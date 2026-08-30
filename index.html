@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Bumpy Partner — Store</title>
+<meta name="color-scheme" content="light">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-base:#ffffff; --bg-subtle:#fafafa; --bg-component:#fafafa; --bg-field:#fafafa;
+    --bg-highlight:#eff6ff;
+    --fg-base:#18181b; --fg-subtle:#52525b; --fg-muted:#71717a; --fg-on-color:#ffffff;
+    --fg-interactive:#3b82f6; --fg-error:#e11d48;
+    --border-base:#e4e4e7; --border-strong:#d4d4d8;
+    --button-inverted:#27272a;
+    --tag-green-bg:#d1fae5; --tag-green-text:#065f46; --tag-green-border:#a7f3d0;
+    --tag-orange-bg:#ffedd5; --tag-orange-text:#9a3412; --tag-orange-border:#fed7aa;
+    --tag-neutral-bg:#f4f4f5; --tag-neutral-text:#52525b; --tag-neutral-border:#e4e4e7;
+    --tag-red-bg:#ffe4e6; --tag-red-text:#9f1239; --tag-red-border:#fecdd3;
+    --tag-blue-bg:#dbeafe; --tag-blue-text:#1e40af; --tag-blue-border:#bfdbfe;
+    --shadow-card:0 0 0 1px rgba(0,0,0,.06), 0 1px 2px -1px rgba(0,0,0,.08);
+    --shadow-pop:0 8px 16px -4px rgba(0,0,0,.1), 0 0 0 1px rgba(0,0,0,.06);
+    --r:8px; --r-lg:12px;
+  }
+
+  *{box-sizing:border-box} [hidden]{display:none!important}
+  body{margin:0;background:var(--bg-subtle);color:var(--fg-base);
+    font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+
+  /* ---- shell: fixed sidebar + scrolling content, same as the panel ---- */
+  .app{display:flex;min-height:100vh}
+  .side{width:220px;flex-shrink:0;background:var(--bg-subtle);border-right:1px solid var(--border-base);
+    display:flex;flex-direction:column;padding:12px;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:8px;padding:8px 8px 14px;font-weight:600;font-size:14px}
+  .brand .avatar{width:24px;height:24px;border-radius:6px;background:var(--button-inverted);
+    color:var(--fg-on-color);display:grid;place-items:center;font-size:11px;font-weight:700;flex-shrink:0}
+  .nav{display:flex;flex-direction:column;gap:2px}
+  .nav a{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--r);
+    color:var(--fg-subtle);font-weight:500;cursor:pointer}
+  .nav a:hover{background:var(--tag-neutral-bg);color:var(--fg-base)}
+  .nav a.on{background:var(--bg-base);color:var(--fg-base);box-shadow:var(--shadow-card)}
+  .nav a svg{flex-shrink:0;color:var(--fg-muted)}
+  .nav a.on svg{color:var(--fg-base)}
+  .subnav{display:flex;flex-direction:column;gap:2px;margin:2px 0 2px 26px}
+  .subnav a{padding:5px 8px;font-size:13px}
+  .side-foot{margin-top:auto;border-top:1px solid var(--border-base);padding-top:10px;
+    display:flex;align-items:center;gap:8px;color:var(--fg-muted);font-size:12px}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .content{width:100%;max-width:1180px;margin:0 auto;padding:20px 24px 60px}
+
+  /* ---- page header ---- */
+  .ph{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+  .ph h1{font-size:20px;font-weight:600;letter-spacing:-.01em;margin:0}
+  .ph p{margin:2px 0 0;color:var(--fg-muted);font-size:13px}
+  .crumb{display:flex;align-items:center;gap:6px;color:var(--fg-muted);font-size:13px;margin-bottom:10px}
+  .crumb a{cursor:pointer} .crumb a:hover{color:var(--fg-base)}
+
+  /* ---- buttons ---- */
+  .btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:var(--r);
+    border:1px solid var(--border-base);background:var(--bg-base);color:var(--fg-base);
+    font:inherit;font-size:13px;font-weight:500;cursor:pointer;box-shadow:var(--shadow-card);white-space:nowrap}
+  .btn:hover{background:var(--bg-subtle)}
+  .btn.primary{background:var(--button-inverted);color:var(--fg-on-color);border-color:transparent}
+  .btn.primary:hover{background:#3f3f46}
+  .btn.danger{color:var(--fg-error)}
+  .btn.sm{height:28px;padding:0 9px;font-size:12px}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+
+  /* ---- container card: the panel's one surface ---- */
+  .card{background:var(--bg-base);border-radius:var(--r-lg);box-shadow:var(--shadow-card);overflow:hidden}
+  .card + .card{margin-top:16px}
+  .card-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;
+    border-bottom:1px solid var(--border-base)}
+  .card-h h2{font-size:14px;font-weight:600;margin:0}
+  .card-h .sub{color:var(--fg-muted);font-size:12px;margin:2px 0 0}
+  .card-b{padding:16px}
+
+  /* ---- toolbar ---- */
+  .bar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border-base);flex-wrap:wrap}
+  .search{flex:1;min-width:160px;height:32px;border:1px solid var(--border-base);border-radius:var(--r);
+    background:var(--bg-field);padding:0 10px;font:inherit;font-size:13px;color:var(--fg-base);outline:none}
+  .search::placeholder{color:var(--fg-muted)}
+  .search:focus{border-color:var(--border-strong);background:var(--bg-base)}
+  select.filter{height:32px;border:1px solid var(--border-base);border-radius:var(--r);background:var(--bg-base);
+    padding:0 8px;font:inherit;font-size:13px;color:var(--fg-subtle);cursor:pointer;outline:none}
+
+  /* ---- table ---- */
+  /* Wide tables scroll inside their own card — the page body must never
+     scroll sideways, and a clipped Date column is a lie about the data. */
+  .tbl-wrap{overflow-x:auto}
+  .tbl{width:100%;border-collapse:collapse}
+  .tbl.wide{min-width:720px}
+  .tbl th{text-align:left;font-size:12px;font-weight:500;color:var(--fg-muted);
+    padding:9px 16px;border-bottom:1px solid var(--border-base);white-space:nowrap}
+  .tbl td{padding:11px 16px;border-bottom:1px solid var(--border-base);vertical-align:middle}
+  .tbl tbody tr{cursor:pointer}
+  .tbl tbody tr:hover{background:var(--bg-subtle)}
+  .tbl tbody tr:last-child td{border-bottom:none}
+  .tbl .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .tbl th.num{text-align:right}
+  .cell-t{display:flex;align-items:center;gap:10px;min-width:0}
+  .thumb{width:32px;height:32px;border-radius:6px;flex-shrink:0;overflow:hidden;background:var(--bg-subtle);
+    border:1px solid var(--border-base)}
+  .thumb svg{display:block;width:100%;height:100%}
+  .t-name{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .t-sub{color:var(--fg-muted);font-size:12px}
+  .muted{color:var(--fg-muted)}
+
+  /* ---- badges ---- */
+  .badge{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;
+    font-size:12px;font-weight:500;border:1px solid;white-space:nowrap}
+  .badge i{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+  .b-green{background:var(--tag-green-bg);color:var(--tag-green-text);border-color:var(--tag-green-border)}
+  .b-orange{background:var(--tag-orange-bg);color:var(--tag-orange-text);border-color:var(--tag-orange-border)}
+  .b-neutral{background:var(--tag-neutral-bg);color:var(--tag-neutral-text);border-color:var(--tag-neutral-border)}
+  .b-red{background:var(--tag-red-bg);color:var(--tag-red-text);border-color:var(--tag-red-border)}
+  .b-blue{background:var(--tag-blue-bg);color:var(--tag-blue-text);border-color:var(--tag-blue-border)}
+
+  /* ---- stats ---- */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr)}
+  .stat{padding:14px 16px;border-right:1px solid var(--border-base)}
+  .stat:last-child{border-right:none}
+  .stat .k{font-size:12px;color:var(--fg-muted)}
+  .stat .v{font-size:22px;font-weight:600;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums}
+  @media (max-width:720px){.stats{grid-template-columns:1fr}
+    .stat{border-right:none;border-bottom:1px solid var(--border-base)}
+    .stat:last-child{border-bottom:none}}
+
+  /* ---- forms ---- */
+  .fld{margin-bottom:14px}
+  .fld label{display:block;font-size:13px;font-weight:500;margin-bottom:5px}
+  .fld .hint{color:var(--fg-muted);font-size:12px;font-weight:400;margin-left:6px}
+  .fld input,.fld textarea,.fld select{width:100%;border:1px solid var(--border-base);border-radius:var(--r);
+    background:var(--bg-field);padding:7px 10px;font:inherit;font-size:14px;color:var(--fg-base);outline:none}
+  .fld input:focus,.fld textarea:focus,.fld select:focus{border-color:var(--border-strong);background:var(--bg-base)}
+  .fld textarea{min-height:104px;resize:vertical;line-height:1.55}
+  .fld-row{display:flex;gap:12px}.fld-row .fld{flex:1;min-width:0}
+  .help{color:var(--fg-muted);font-size:12px;margin:-8px 0 14px}
+  .drop{border:1px dashed var(--border-strong);border-radius:var(--r);background:var(--bg-field);
+    padding:22px;text-align:center;color:var(--fg-muted);font-size:13px;cursor:pointer}
+  .drop:hover{background:var(--bg-base)}
+
+  /* ---- share link ---- */
+  .share{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg-highlight);
+    border-top:1px solid var(--border-base)}
+  .share code{flex:1;min-width:0;font-family:"Roboto Mono",ui-monospace,monospace;font-size:12px;
+    color:var(--fg-subtle);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .qr{width:56px;height:56px;background:#fff;border:1px solid var(--border-base);border-radius:6px;padding:3px;flex-shrink:0}
+  .qr svg{display:block;width:100%;height:100%}
+
+  /* ---- empty state ---- */
+  .empty{padding:52px 20px;text-align:center}
+  .empty h3{font-size:15px;font-weight:600;margin:0 0 4px}
+  .empty p{margin:0 0 16px;color:var(--fg-muted);font-size:13px}
+
+  /* ---- key/value rows on detail ---- */
+  .kv{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid var(--border-base);font-size:13px}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--fg-muted)}
+  .kv .v{font-weight:500;text-align:right}
+  .two{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;align-items:start}
+  @media (max-width:900px){.two{grid-template-columns:1fr}}
+  .sec-lbl{font-size:12px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;
+    letter-spacing:.04em;margin:0 0 8px}
+
+  .pg{display:flex;min-height:100vh}
+  .pg[hidden]{display:none}
+</style>
+</head><body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="g-isl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d1030"/><stop offset=".55" stop-color="#8a3f52"/><stop offset="1" stop-color="#ffa25c"/></linearGradient>
+  <linearGradient id="g-sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#12324a"/><stop offset="1" stop-color="#07131f"/></linearGradient>
+  <g id="a-island"><rect width="100" height="100" fill="url(#g-isl)"/><circle cx="66" cy="52" r="11" fill="#ffd9a3"/><path d="M0 60 q14 -11 26 -1 q9 7 18 1 q10 -7 20 1 q8 6 16 -1 v10 H0 Z" fill="#2a1430" opacity=".85"/><rect y="67" width="100" height="33" fill="url(#g-sea)"/></g>
+  <linearGradient id="g-boat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b0f3d"/><stop offset=".5" stop-color="#c14a3e"/><stop offset="1" stop-color="#ffb066"/></linearGradient>
+  <g id="a-boat"><rect width="100" height="100" fill="url(#g-boat)"/><circle cx="50" cy="52" r="12" fill="#ffe3b0"/><rect y="58" width="100" height="42" fill="#170b26" opacity=".72"/><path d="M28 58 h38 l-6 7 H34 Z" fill="#0c0614"/><rect x="44" y="42" width="1.6" height="16" fill="#0c0614"/><path d="M46 42 l10 14 h-10 Z" fill="#0c0614"/></g>
+  <g id="a-tee"><rect width="100" height="100" fill="#141416"/><path d="M33 26 l9 -5 h16 l9 5 l8 7 -7 8 -3 -2 v30 q0 2 -2 2 H37 q-2 0 -2 -2 V39 l-3 2 -7 -8 Z" fill="#2b2b30"/><circle cx="50" cy="48" r="8" fill="none" stroke="#ff8a3d" stroke-width="2.6"/><circle cx="50" cy="48" r="5.2" fill="#2b2b30"/></g>
+  <linearGradient id="g-road" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1226"/><stop offset="1" stop-color="#141a2e"/></linearGradient>
+  <g id="a-transfer"><rect width="100" height="100" fill="url(#g-road)"/><path d="M42 40 h16 l26 60 H16 Z" fill="#1d2440"/><rect x="48.4" y="52" width="3.2" height="9" rx="1.2" fill="#8fa0d8" opacity=".45"/><rect x="47.4" y="70" width="5.2" height="11" rx="1.6" fill="#8fa0d8" opacity=".35"/><circle cx="36" cy="42" r="6" fill="#ffd98a" opacity=".55"/><circle cx="64" cy="42" r="6" fill="#ffd98a" opacity=".55"/></g>
+</defs></svg>
+
+<section class="pg" data-pg="products" hidden>
+<aside class="side">
+  <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
+  <nav class="nav">
+    <a class="nav-a" data-go="events"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Events</a>
+    <a class="nav-a on" data-go="products"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8"/></svg>Store</a>
+    <div class="subnav">
+      <a class="nav-a on" data-go="products">Products</a>
+      <a class="nav-a" data-go="orders">Orders</a>
+    </div>
+    <a class="nav-a" data-go="analytics"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Analytics</a>
+    <a class="nav-a" data-go="settings"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Settings</a>
+  </nav>
+  <div class="side-foot"><span>Bumpy Partner</span></div>
+</aside>
+<div class="main"><div class="content">
+<div class="ph">
+  <div><h1>Products</h1><p>Things you sell that aren't events — trips, add-ons, merch.</p></div>
+  <button class="btn primary" data-go="create"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>New product</button>
+</div>
+
+<div class="card">
+  <div class="bar">
+    <input class="search" placeholder="Search products">
+    <select class="filter"><option>All statuses</option><option>Published</option><option>Draft</option><option>Archived</option></select>
+  </div>
+  <div class="tbl-wrap"><table class="tbl wide">
+    <thead><tr>
+      <th>Product</th><th class="num">Price</th><th class="num">Sold</th>
+      <th class="num">Remaining</th><th>Status</th><th></th>
+    </tr></thead>
+    <tbody>
+      <tr data-go="detail" data-id="sti_01">
+        <td><span class="cell-t"><span class="thumb" style="width:32px;height:32px"><svg viewBox="0 0 100 100"><use href="#a-island"/></svg></span><span class="t-name">Island Day Trip — Koh Larn</span></span></td>
+        <td class="num">2,400 THB</td>
+        <td class="num">21</td>
+        <td class="num">3</td>
+        <td><span class="badge b-green"><i></i>Published</span></td>
+        <td class="num"><button class="btn sm" data-stop><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Copy link</button></td>
+      </tr>
+      <tr data-go="detail" data-id="sti_02">
+        <td><span class="cell-t"><span class="thumb" style="width:32px;height:32px"><svg viewBox="0 0 100 100"><use href="#a-boat"/></svg></span><span class="t-name">Sunset Boat Party</span></span></td>
+        <td class="num">1,800 THB</td>
+        <td class="num">34</td>
+        <td class="num">26</td>
+        <td><span class="badge b-green"><i></i>Published</span></td>
+        <td class="num"><button class="btn sm" data-stop><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Copy link</button></td>
+      </tr>
+      <tr data-go="detail" data-id="sti_03">
+        <td><span class="cell-t"><span class="thumb" style="width:32px;height:32px"><svg viewBox="0 0 100 100"><use href="#a-tee"/></svg></span><span class="t-name">Afterlight Tee — Eclipse</span></span></td>
+        <td class="num">890 THB</td>
+        <td class="num">47</td>
+        <td class="num">73</td>
+        <td><span class="badge b-green"><i></i>Published</span></td>
+        <td class="num"><button class="btn sm" data-stop><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Copy link</button></td>
+      </tr>
+      <tr data-go="detail" data-id="sti_04">
+        <td><span class="cell-t"><span class="thumb" style="width:32px;height:32px"><svg viewBox="0 0 100 100"><use href="#a-transfer"/></svg></span><span class="t-name">Airport Transfer BKK ⇄ Sukhumvit</span></span></td>
+        <td class="num">650 THB</td>
+        <td class="num">12</td>
+        <td class="num"><span class="muted">—</span></td>
+        <td><span class="badge b-neutral"><i></i>Draft</span></td>
+        <td class="num"><button class="btn sm" data-stop><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Copy link</button></td>
+      </tr></tbody>
+  </table></div>
+</div>
+
+<!-- The empty state is what a new seller actually lands on, so it carries the
+     create action rather than sending them back to the header button. -->
+<div class="card" style="margin-top:16px">
+  <div class="card-h"><div><h2>Empty state</h2>
+    <p class="sub">What this page looks like before the first product exists</p></div></div>
+  <div class="empty">
+    <h3>No products yet</h3>
+    <p>Sell a trip, an add-on, or merch alongside your events.</p>
+    <button class="btn primary" data-go="create"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>New product</button>
+  </div>
+</div>
+</div></div></section><section class="pg" data-pg="create" hidden>
+<aside class="side">
+  <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
+  <nav class="nav">
+    <a class="nav-a" data-go="events"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Events</a>
+    <a class="nav-a on" data-go="products"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8"/></svg>Store</a>
+    <div class="subnav">
+      <a class="nav-a on" data-go="products">Products</a>
+      <a class="nav-a" data-go="orders">Orders</a>
+    </div>
+    <a class="nav-a" data-go="analytics"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Analytics</a>
+    <a class="nav-a" data-go="settings"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Settings</a>
+  </nav>
+  <div class="side-foot"><span>Bumpy Partner</span></div>
+</aside>
+<div class="main"><div class="content">
+<div class="crumb"><a data-go="products">Products</a><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>New product</span></div>
+<div class="ph">
+  <div><h1>New product</h1>
+    <p>Title, description and price. That's the whole thing.</p></div>
+</div>
+
+<div class="two">
+  <div class="card">
+    <div class="card-b">
+      <div class="fld">
+        <label for="f-t">Title</label>
+        <input id="f-t" value="" placeholder="e.g. Island Day Trip — Koh Larn, 4 Sep">
+      </div>
+      <p class="help">There is no date field. If your item runs on a day, put the day in the title.</p>
+
+      <div class="fld">
+        <label for="f-d">Description</label>
+        <textarea id="f-d" placeholder="What the buyer gets."></textarea>
+      </div>
+      <p class="help">This is the only body copy on the public page — say what's included and what isn't.</p>
+
+      <div class="fld-row">
+        <div class="fld"><label for="f-p">Price <span class="hint">THB</span></label>
+          <input id="f-p" inputmode="numeric" value="" placeholder="0"></div>
+        <div class="fld"><label for="f-q">Quantity available</label>
+          <input id="f-q" inputmode="numeric" value="" placeholder="0"></div>
+      </div>
+      <p class="help">Quantity drives “Only N left” and sold-out on the public page.</p>
+
+      <div class="fld"><label for="f-s">Status</label>
+        <select id="f-s"><option selected>Draft</option><option>Published</option></select></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-h"><h2>Image</h2></div>
+      <div class="card-b">
+        
+        <div class="drop">Drop an image, or click to upload<br><span style="font-size:12px">JPG or PNG, square works best</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-b" style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn primary" data-go="products">Create product</button>
+        <button class="btn" data-go="products">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div></div></section><section class="pg" data-pg="detail" hidden>
+<aside class="side">
+  <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
+  <nav class="nav">
+    <a class="nav-a" data-go="events"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Events</a>
+    <a class="nav-a on" data-go="products"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8"/></svg>Store</a>
+    <div class="subnav">
+      <a class="nav-a on" data-go="products">Products</a>
+      <a class="nav-a" data-go="orders">Orders</a>
+    </div>
+    <a class="nav-a" data-go="analytics"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Analytics</a>
+    <a class="nav-a" data-go="settings"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Settings</a>
+  </nav>
+  <div class="side-foot"><span>Bumpy Partner</span></div>
+</aside>
+<div class="main"><div class="content">
+<div class="crumb"><a data-go="products">Products</a><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Island Day Trip — Koh Larn</span></div>
+<div class="ph">
+  <div><h1>Island Day Trip — Koh Larn</h1><p><span class="badge b-green"><i></i>Published</span></p></div>
+  <div style="display:flex;gap:8px">
+    <button class="btn" data-go="edit">Edit</button>
+    <button class="btn">Unpublish</button>
+  </div>
+</div>
+
+<!-- Real numbers only: sold and remaining come from purchase rows, revenue is
+     what was actually captured. Nothing modelled or projected. -->
+<div class="card">
+  <div class="stats">
+    <div class="stat"><div class="k">Sold</div><div class="v">21</div></div>
+    <div class="stat"><div class="k">Revenue</div><div class="v">5,088 THB</div></div>
+    <div class="stat"><div class="k">Remaining</div><div class="v">3</div></div>
+  </div>
+</div>
+
+<div class="two" style="margin-top:16px">
+  <div class="card">
+    <div class="card-h"><h2>Orders for this product</h2>
+      <button class="btn sm" data-go="orders">View all</button></div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>Order</th><th>Buyer</th><th class="num">Amount</th>
+        <th>Payment</th><th class="num">Date</th></tr></thead>
+      <tbody>
+      <tr data-go="order" data-id="2117">
+        <td><span class="t-name">#2117</span></td>
+        <td><span class="t-name">Eldar Tsabari</span><div class="t-sub">eldar@example.com</div></td>
+        <td class="num">5,088 THB</td>
+        <td><span class="badge b-green"><i></i>Paid</span></td>
+        <td class="num muted">30 Aug, 14:02</td>
+      </tr>
+      <tr data-go="order" data-id="2114">
+        <td><span class="t-name">#2114</span></td>
+        <td><span class="t-name">Noa Barak</span><div class="t-sub">noa@example.com</div></td>
+        <td class="num">2,544 THB</td>
+        <td><span class="badge b-neutral"><i></i>Refunded</span></td>
+        <td class="num muted">29 Aug, 18:33</td>
+      </tr></tbody>
+    </table></div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-h"><h2>Details</h2></div>
+      <div style="border-bottom:1px solid var(--border-base);height:150px;overflow:hidden">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"
+             style="display:block;width:100%;height:100%"><use href="#a-island"/></svg>
+      </div>
+      <div class="card-b">
+        <p style="margin:0 0 12px;color:var(--fg-subtle);font-size:13px">A full day off the mainland with the Afterlight crew. Speedboat out at first light, two beaches before the day-trip boats arrive, lunch on the sand, and back in time for the evening set.</p>
+        <div class="kv"><span class="k">Price</span><span class="v">2,400 THB</span></div>
+        <div class="kv"><span class="k">Quantity</span><span class="v">24</span></div>
+        <div class="kv"><span class="k">Status</span><span class="v"><span class="badge b-green"><i></i>Published</span></span></div>
+      </div>
+      <!-- A store item has no browse surface — it is reached by link, exactly
+           as an event is. So the link is a first-class thing on this page. -->
+      <div class="share">
+        <span class="qr"><svg viewBox="0 0 25 25" shape-rendering="crispEdges" fill="#000" role="img" aria-label="Shareable link QR code"><rect x="8" y="0" width="1" height="1"/><rect x="11" y="0" width="1" height="1"/><rect x="12" y="0" width="1" height="1"/><rect x="13" y="0" width="1" height="1"/><rect x="15" y="0" width="1" height="1"/><rect x="16" y="0" width="1" height="1"/><rect x="10" y="1" width="1" height="1"/><rect x="11" y="1" width="1" height="1"/><rect x="15" y="1" width="1" height="1"/><rect x="16" y="1" width="1" height="1"/><rect x="8" y="2" width="1" height="1"/><rect x="11" y="2" width="1" height="1"/><rect x="12" y="2" width="1" height="1"/><rect x="13" y="2" width="1" height="1"/><rect x="16" y="2" width="1" height="1"/><rect x="8" y="3" width="1" height="1"/><rect x="9" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="13" y="3" width="1" height="1"/><rect x="15" y="3" width="1" height="1"/><rect x="8" y="4" width="1" height="1"/><rect x="11" y="4" width="1" height="1"/><rect x="12" y="4" width="1" height="1"/><rect x="13" y="4" width="1" height="1"/><rect x="15" y="4" width="1" height="1"/><rect x="8" y="5" width="1" height="1"/><rect x="9" y="5" width="1" height="1"/><rect x="12" y="5" width="1" height="1"/><rect x="13" y="5" width="1" height="1"/><rect x="15" y="5" width="1" height="1"/><rect x="8" y="6" width="1" height="1"/><rect x="9" y="6" width="1" height="1"/><rect x="11" y="6" width="1" height="1"/><rect x="12" y="6" width="1" height="1"/><rect x="15" y="6" width="1" height="1"/><rect x="16" y="6" width="1" height="1"/><rect x="8" y="7" width="1" height="1"/><rect x="10" y="7" width="1" height="1"/><rect x="11" y="7" width="1" height="1"/><rect x="1" y="8" width="1" height="1"/><rect x="4" y="8" width="1" height="1"/><rect x="5" y="8" width="1" height="1"/><rect x="6" y="8" width="1" height="1"/><rect x="7" y="8" width="1" height="1"/><rect x="9" y="8" width="1" height="1"/><rect x="11" y="8" width="1" height="1"/><rect x="12" y="8" width="1" height="1"/><rect x="14" y="8" width="1" height="1"/><rect x="15" y="8" width="1" height="1"/><rect x="16" y="8" width="1" height="1"/><rect x="19" y="8" width="1" height="1"/><rect x="21" y="8" width="1" height="1"/><rect x="23" y="8" width="1" height="1"/><rect x="3" y="9" width="1" height="1"/><rect x="9" y="9" width="1" height="1"/><rect x="11" y="9" width="1" height="1"/><rect x="14" y="9" width="1" height="1"/><rect x="15" y="9" width="1" height="1"/><rect x="17" y="9" width="1" height="1"/><rect x="18" y="9" width="1" height="1"/><rect x="19" y="9" width="1" height="1"/><rect x="20" y="9" width="1" height="1"/><rect x="23" y="9" width="1" height="1"/><rect x="24" y="9" width="1" height="1"/><rect x="0" y="10" width="1" height="1"/><rect x="1" y="10" width="1" height="1"/><rect x="2" y="10" width="1" height="1"/><rect x="3" y="10" width="1" height="1"/><rect x="6" y="10" width="1" height="1"/><rect x="8" y="10" width="1" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="16" y="10" width="1" height="1"/><rect x="17" y="10" width="1" height="1"/><rect x="18" y="10" width="1" height="1"/><rect x="19" y="10" width="1" height="1"/><rect x="21" y="10" width="1" height="1"/><rect x="22" y="10" width="1" height="1"/><rect x="24" y="10" width="1" height="1"/><rect x="2" y="11" width="1" height="1"/><rect x="4" y="11" width="1" height="1"/><rect x="6" y="11" width="1" height="1"/><rect x="12" y="11" width="1" height="1"/><rect x="13" y="11" width="1" height="1"/><rect x="14" y="11" width="1" height="1"/><rect x="15" y="11" width="1" height="1"/><rect x="16" y="11" width="1" height="1"/><rect x="17" y="11" width="1" height="1"/><rect x="18" y="11" width="1" height="1"/><rect x="19" y="11" width="1" height="1"/><rect x="20" y="11" width="1" height="1"/><rect x="21" y="11" width="1" height="1"/><rect x="23" y="11" width="1" height="1"/><rect x="24" y="11" width="1" height="1"/><rect x="1" y="12" width="1" height="1"/><rect x="2" y="12" width="1" height="1"/><rect x="3" y="12" width="1" height="1"/><rect x="4" y="12" width="1" height="1"/><rect x="6" y="12" width="1" height="1"/><rect x="9" y="12" width="1" height="1"/><rect x="14" y="12" width="1" height="1"/><rect x="16" y="12" width="1" height="1"/><rect x="17" y="12" width="1" height="1"/><rect x="18" y="12" width="1" height="1"/><rect x="19" y="12" width="1" height="1"/><rect x="21" y="12" width="1" height="1"/><rect x="22" y="12" width="1" height="1"/><rect x="1" y="13" width="1" height="1"/><rect x="2" y="13" width="1" height="1"/><rect x="3" y="13" width="1" height="1"/><rect x="5" y="13" width="1" height="1"/><rect x="6" y="13" width="1" height="1"/><rect x="7" y="13" width="1" height="1"/><rect x="9" y="13" width="1" height="1"/><rect x="11" y="13" width="1" height="1"/><rect x="12" y="13" width="1" height="1"/><rect x="16" y="13" width="1" height="1"/><rect x="22" y="13" width="1" height="1"/><rect x="23" y="13" width="1" height="1"/><rect x="24" y="13" width="1" height="1"/><rect x="1" y="14" width="1" height="1"/><rect x="2" y="14" width="1" height="1"/><rect x="3" y="14" width="1" height="1"/><rect x="4" y="14" width="1" height="1"/><rect x="6" y="14" width="1" height="1"/><rect x="7" y="14" width="1" height="1"/><rect x="8" y="14" width="1" height="1"/><rect x="9" y="14" width="1" height="1"/><rect x="11" y="14" width="1" height="1"/><rect x="14" y="14" width="1" height="1"/><rect x="15" y="14" width="1" height="1"/><rect x="16" y="14" width="1" height="1"/><rect x="17" y="14" width="1" height="1"/><rect x="18" y="14" width="1" height="1"/><rect x="19" y="14" width="1" height="1"/><rect x="20" y="14" width="1" height="1"/><rect x="21" y="14" width="1" height="1"/><rect x="22" y="14" width="1" height="1"/><rect x="23" y="14" width="1" height="1"/><rect x="1" y="15" width="1" height="1"/><rect x="2" y="15" width="1" height="1"/><rect x="3" y="15" width="1" height="1"/><rect x="5" y="15" width="1" height="1"/><rect x="6" y="15" width="1" height="1"/><rect x="9" y="15" width="1" height="1"/><rect x="10" y="15" width="1" height="1"/><rect x="12" y="15" width="1" height="1"/><rect x="15" y="15" width="1" height="1"/><rect x="16" y="15" width="1" height="1"/><rect x="17" y="15" width="1" height="1"/><rect x="18" y="15" width="1" height="1"/><rect x="20" y="15" width="1" height="1"/><rect x="23" y="15" width="1" height="1"/><rect x="1" y="16" width="1" height="1"/><rect x="3" y="16" width="1" height="1"/><rect x="6" y="16" width="1" height="1"/><rect x="7" y="16" width="1" height="1"/><rect x="11" y="16" width="1" height="1"/><rect x="12" y="16" width="1" height="1"/><rect x="13" y="16" width="1" height="1"/><rect x="16" y="16" width="1" height="1"/><rect x="17" y="16" width="1" height="1"/><rect x="20" y="16" width="1" height="1"/><rect x="21" y="16" width="1" height="1"/><rect x="22" y="16" width="1" height="1"/><rect x="23" y="16" width="1" height="1"/><rect x="24" y="16" width="1" height="1"/><rect x="8" y="17" width="1" height="1"/><rect x="10" y="17" width="1" height="1"/><rect x="13" y="17" width="1" height="1"/><rect x="15" y="17" width="1" height="1"/><rect x="18" y="17" width="1" height="1"/><rect x="24" y="17" width="1" height="1"/><rect x="8" y="18" width="1" height="1"/><rect x="10" y="18" width="1" height="1"/><rect x="11" y="18" width="1" height="1"/><rect x="19" y="18" width="1" height="1"/><rect x="23" y="18" width="1" height="1"/><rect x="24" y="18" width="1" height="1"/><rect x="8" y="19" width="1" height="1"/><rect x="9" y="19" width="1" height="1"/><rect x="10" y="19" width="1" height="1"/><rect x="15" y="19" width="1" height="1"/><rect x="16" y="19" width="1" height="1"/><rect x="21" y="19" width="1" height="1"/><rect x="24" y="19" width="1" height="1"/><rect x="8" y="20" width="1" height="1"/><rect x="9" y="20" width="1" height="1"/><rect x="10" y="20" width="1" height="1"/><rect x="11" y="20" width="1" height="1"/><rect x="12" y="20" width="1" height="1"/><rect x="14" y="20" width="1" height="1"/><rect x="18" y="20" width="1" height="1"/><rect x="21" y="20" width="1" height="1"/><rect x="24" y="20" width="1" height="1"/><rect x="8" y="21" width="1" height="1"/><rect x="9" y="21" width="1" height="1"/><rect x="10" y="21" width="1" height="1"/><rect x="16" y="21" width="1" height="1"/><rect x="8" y="22" width="1" height="1"/><rect x="9" y="22" width="1" height="1"/><rect x="10" y="22" width="1" height="1"/><rect x="11" y="22" width="1" height="1"/><rect x="12" y="22" width="1" height="1"/><rect x="13" y="22" width="1" height="1"/><rect x="14" y="22" width="1" height="1"/><rect x="15" y="22" width="1" height="1"/><rect x="16" y="22" width="1" height="1"/><rect x="19" y="22" width="1" height="1"/><rect x="21" y="22" width="1" height="1"/><rect x="23" y="22" width="1" height="1"/><rect x="24" y="22" width="1" height="1"/><rect x="9" y="23" width="1" height="1"/><rect x="10" y="23" width="1" height="1"/><rect x="12" y="23" width="1" height="1"/><rect x="19" y="23" width="1" height="1"/><rect x="20" y="23" width="1" height="1"/><rect x="21" y="23" width="1" height="1"/><rect x="24" y="23" width="1" height="1"/><rect x="8" y="24" width="1" height="1"/><rect x="9" y="24" width="1" height="1"/><rect x="10" y="24" width="1" height="1"/><rect x="12" y="24" width="1" height="1"/><rect x="13" y="24" width="1" height="1"/><rect x="14" y="24" width="1" height="1"/><rect x="15" y="24" width="1" height="1"/><rect x="16" y="24" width="1" height="1"/><rect x="17" y="24" width="1" height="1"/><rect x="21" y="24" width="1" height="1"/><rect x="23" y="24" width="1" height="1"/><rect x="24" y="24" width="1" height="1"/><rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="#fff"/><rect x="2" y="2" width="3" height="3"/><rect x="18" y="0" width="7" height="7"/><rect x="19" y="1" width="5" height="5" fill="#fff"/><rect x="20" y="2" width="3" height="3"/><rect x="0" y="18" width="7" height="7"/><rect x="1" y="19" width="5" height="5" fill="#fff"/><rect x="2" y="20" width="3" height="3"/></svg></span>
+        <code>bumpy.fm/s/island-day-trip-koh-larn</code>
+        <button class="btn sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Copy</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div></div></section><section class="pg" data-pg="edit" hidden>
+<aside class="side">
+  <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
+  <nav class="nav">
+    <a class="nav-a" data-go="events"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Events</a>
+    <a class="nav-a on" data-go="products"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8"/></svg>Store</a>
+    <div class="subnav">
+      <a class="nav-a on" data-go="products">Products</a>
+      <a class="nav-a" data-go="orders">Orders</a>
+    </div>
+    <a class="nav-a" data-go="analytics"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Analytics</a>
+    <a class="nav-a" data-go="settings"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Settings</a>
+  </nav>
+  <div class="side-foot"><span>Bumpy Partner</span></div>
+</aside>
+<div class="main"><div class="content">
+<div class="crumb"><a data-go="products">Products</a><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Edit</span></div>
+<div class="ph">
+  <div><h1>Edit product</h1>
+    <p>Title, description and price. That's the whole thing.</p></div>
+</div>
+
+<div class="two">
+  <div class="card">
+    <div class="card-b">
+      <div class="fld">
+        <label for="f-t">Title</label>
+        <input id="f-t" value="Island Day Trip — Koh Larn" placeholder="e.g. Island Day Trip — Koh Larn, 4 Sep">
+      </div>
+      <p class="help">There is no date field. If your item runs on a day, put the day in the title.</p>
+
+      <div class="fld">
+        <label for="f-d">Description</label>
+        <textarea id="f-d" placeholder="What the buyer gets.">A full day off the mainland with the Afterlight crew. Speedboat out at first light, two beaches before the day-trip boats arrive, lunch on the sand, and back in time for the evening set.</textarea>
+      </div>
+      <p class="help">This is the only body copy on the public page — say what's included and what isn't.</p>
+
+      <div class="fld-row">
+        <div class="fld"><label for="f-p">Price <span class="hint">THB</span></label>
+          <input id="f-p" inputmode="numeric" value="2400" placeholder="0"></div>
+        <div class="fld"><label for="f-q">Quantity available</label>
+          <input id="f-q" inputmode="numeric" value="24" placeholder="0"></div>
+      </div>
+      <p class="help">Quantity drives “Only N left” and sold-out on the public page.</p>
+
+      <div class="fld"><label for="f-s">Status</label>
+        <select id="f-s"><option>Draft</option><option selected>Published</option></select></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-h"><h2>Image</h2></div>
+      <div class="card-b">
+        <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border-base);margin-bottom:10px;height:140px"><svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" style="display:block;width:100%;height:100%"><use href="#a-island"/></svg></div>
+        <div class="drop">Drop an image, or click to upload<br><span style="font-size:12px">JPG or PNG, square works best</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-b" style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn primary" data-go="detail">Save changes</button>
+        <button class="btn" data-go="detail">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div></div></section><section class="pg" data-pg="orders" hidden>
+<aside class="side">
+  <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
+  <nav class="nav">
+    <a class="nav-a" data-go="events"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Events</a>
+    <a class="nav-a on" data-go="products"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8"/></svg>Store</a>
+    <div class="subnav">
+      <a class="nav-a" data-go="products">Products</a>
+      <a class="nav-a on" data-go="orders">Orders</a>
+    </div>
+    <a class="nav-a" data-go="analytics"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Analytics</a>
+    <a class="nav-a" data-go="settings"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Settings</a>
+  </nav>
+  <div class="side-foot"><span>Bumpy Partner</span></div>
+</aside>
+<div class="main"><div class="content">
+<div class="ph">
+  <div><h1>Orders</h1><p>Everything sold from your store, across every product.</p></div>
+  <button class="btn">Export</button>
+</div>
+
+<div class="card">
+  <div class="bar">
+    <input class="search" placeholder="Search by buyer, email or order number">
+    <select class="filter"><option>All products</option><option>Island Day Trip — Koh Larn</option><option>Sunset Boat Party</option><option>Afterlight Tee — Eclipse</option><option>Airport Transfer BKK ⇄ Sukhumvit</option></select>
+    <select class="filter"><option>All statuses</option><option>Paid</option><option>Pending</option><option>Refunded</option></select>
+  </div>
+  <div class="tbl-wrap"><table class="tbl wide">
+    <thead><tr><th>Order</th><th>Buyer</th><th>Product</th><th class="num">Qty</th>
+      <th class="num">Amount</th><th>Payment</th><th>Voucher</th><th class="num">Date</th></tr></thead>
+    <tbody>
+      <tr data-go="order" data-id="2117">
+        <td><span class="t-name">#2117</span></td>
+        <td><span class="t-name">Eldar Tsabari</span><div class="t-sub">eldar@example.com</div></td>
+        <td><span class="cell-t"><span class="thumb" style="width:26px;height:26px"><svg viewBox="0 0 100 100"><use href="#a-island"/></svg></span><span class="t-name">Island Day Trip — Koh Larn</span></span></td>
+        <td class="num">2</td>
+        <td class="num">5,088 THB</td>
+        <td><span class="badge b-green"><i></i>Paid</span></td>
+        <td><span class="badge b-blue"><i></i>Issued</span></td>
+        <td class="num muted">30 Aug, 14:02</td>
+      </tr>
+      <tr data-go="order" data-id="2116">
+        <td><span class="t-name">#2116</span></td>
+        <td><span class="t-name">Maya Cohen</span><div class="t-sub">maya@example.com</div></td>
+        <td><span class="cell-t"><span class="thumb" style="width:26px;height:26px"><svg viewBox="0 0 100 100"><use href="#a-tee"/></svg></span><span class="t-name">Afterlight Tee — Eclipse</span></span></td>
+        <td class="num">1</td>
+        <td class="num">943 THB</td>
+        <td><span class="badge b-green"><i></i>Paid</span></td>
+        <td><span class="badge b-green"><i></i>Redeemed</span></td>
+        <td class="num muted">30 Aug, 11:47</td>
+      </tr>
+      <tr data-go="order" data-id="2115">
+        <td><span class="t-name">#2115</span></td>
+        <td><span class="t-name">Tom Alperin</span><div class="t-sub">tom@example.com</div></td>
+        <td><span class="cell-t"><span class="thumb" style="width:26px;height:26px"><svg viewBox="0 0 100 100"><use href="#a-boat"/></svg></span><span class="t-name">Sunset Boat Party</span></span></td>
+        <td class="num">4</td>
+        <td class="num">7,632 THB</td>
+        <td><span class="badge b-green"><i></i>Paid</span></td>
+        <td><span class="badge b-blue"><i></i>Issued</span></td>
+        <td class="num muted">29 Aug, 22:10</td>
+      </tr>
+      <tr data-go="order" data-id="2114">
+        <td><span class="t-name">#2114</span></td>
+        <td><span class="t-name">Noa Barak</span><div class="t-sub">noa@example.com</div></td>
+        <td><span class="cell-t"><span class="thumb" style="width:26px;height:26px"><svg viewBox="0 0 100 100"><use href="#a-island"/></svg></span><span class="t-name">Island Day Trip — Koh Larn</span></span></td>
+        <td class="num">1</td>
+        <td class="num">2,544 THB</td>
+        <td><span class="badge b-neutral"><i></i>Refunded</span></td>
+        <td><span class="badge b-neutral"><i></i>Void</span></td>
+        <td class="num muted">29 Aug, 18:33</td>
+      </tr>
+      <tr data-go="order" data-id="2113">
+        <td><span class="t-name">#2113</span></td>
+        <td><span class="t-name">Dan Levi</span><div class="t-sub">dan@example.com</div></td>
+        <td><span class="cell-t"><span class="thumb" style="width:26px;height:26px"><svg viewBox="0 0 100 100"><use href="#a-tee"/></svg></span><span class="t-name">Afterlight Tee — Eclipse</span></span></td>
+        <td class="num">3</td>
+        <td class="num">2,830 THB</td>
+        <td><span class="badge b-green"><i></i>Paid</span></td>
+        <td><span class="badge b-green"><i></i>Redeemed</span></td>
+        <td class="num muted">29 Aug, 09:05</td>
+      </tr>
+      <tr data-go="order" data-id="2112">
+        <td><span class="t-name">#2112</span></td>
+        <td><span class="t-name">Rin Suwan</span><div class="t-sub">rin@example.com</div></td>
+        <td><span class="cell-t"><span class="thumb" style="width:26px;height:26px"><svg viewBox="0 0 100 100"><use href="#a-boat"/></svg></span><span class="t-name">Sunset Boat Party</span></span></td>
+        <td class="num">2</td>
+        <td class="num">3,816 THB</td>
+        <td><span class="badge b-orange"><i></i>Pending</span></td>
+        <td><span class="badge b-neutral"><i></i>—</span></td>
+        <td class="num muted">28 Aug, 20:51</td>
+      </tr></tbody>
+  </table></div>
+</div>
+</div></div></section><section class="pg" data-pg="order" hidden>
+<aside class="side">
+  <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
+  <nav class="nav">
+    <a class="nav-a" data-go="events"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Events</a>
+    <a class="nav-a on" data-go="products"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8"/></svg>Store</a>
+    <div class="subnav">
+      <a class="nav-a" data-go="products">Products</a>
+      <a class="nav-a on" data-go="orders">Orders</a>
+    </div>
+    <a class="nav-a" data-go="analytics"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Analytics</a>
+    <a class="nav-a" data-go="settings"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Settings</a>
+  </nav>
+  <div class="side-foot"><span>Bumpy Partner</span></div>
+</aside>
+<div class="main"><div class="content">
+<div class="crumb"><a data-go="orders">Orders</a><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>#2117</span></div>
+<div class="ph">
+  <div><h1>Order #2117</h1><p>30 Aug, 14:02 · <span class="badge b-green"><i></i>Paid</span></p></div>
+  <div style="display:flex;gap:8px">
+    <button class="btn">Resend voucher</button>
+    <button class="btn danger">Refund</button>
+  </div>
+</div>
+
+<div class="two">
+  <div>
+    <div class="card">
+      <div class="card-h"><h2>Items</h2></div>
+      <div class="tbl-wrap"><table class="tbl">
+        <tbody><tr style="cursor:default">
+          <td><span class="cell-t"><span class="thumb" style="width:32px;height:32px"><svg viewBox="0 0 100 100"><use href="#a-island"/></svg></span><span class="t-name">Island Day Trip — Koh Larn</span></span></td>
+          <td class="num muted">2 × 2,400 THB</td>
+          <td class="num">4,800 THB</td>
+        </tr></tbody>
+      </table></div></div>
+      <div class="card-b">
+        <div class="kv"><span class="k">Subtotal</span><span class="v">4,800 THB</span></div>
+        <!-- Fee stays carved out here for the same reason it does at checkout:
+             the seller should see what Bumpy took, not a rolled-up number. -->
+        <div class="kv"><span class="k">Service fee</span><span class="v">288 THB</span></div>
+        <div class="kv"><span class="k" style="color:var(--fg-base);font-weight:600">Total</span>
+          <span class="v" style="font-size:15px">5,088 THB</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Payment</h2></div>
+      <div class="card-b">
+        <div class="kv"><span class="k">Status</span><span class="v"><span class="badge b-green"><i></i>Paid</span></span></div>
+        <div class="kv"><span class="k">Method</span><span class="v">Visa •••• 4242</span></div>
+        <div class="kv"><span class="k">Stripe reference</span>
+          <span class="v" style="font-family:'Roboto Mono',monospace;font-size:12px">pi_3QxR8kL2eZv</span></div>
+        <div class="kv"><span class="k">Captured</span><span class="v">30 Aug, 14:02</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-h"><h2>Buyer</h2></div>
+      <div class="card-b">
+        <div class="kv"><span class="k">Name</span><span class="v">Eldar Tsabari</span></div>
+        <div class="kv"><span class="k">Email</span><span class="v">eldar@example.com</span></div>
+        <div class="kv"><span class="k">Phone</span><span class="v">+66 80 123 4567</span></div>
+        <div class="kv"><span class="k">Date of birth</span><span class="v">17 Apr 1992</span></div>
+        <div class="kv"><span class="k">Gender</span><span class="v">Male</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Voucher</h2></div>
+      <div class="card-b">
+        <div class="kv"><span class="k">Number</span>
+          <span class="v" style="font-family:'Roboto Mono',monospace;font-size:12px">VCH-8K2M-4QP7</span></div>
+        <div class="kv"><span class="k">Admits</span><span class="v">2 people</span></div>
+        <div class="kv"><span class="k">Status</span><span class="v"><span class="badge b-blue"><i></i>Issued</span></span></div>
+      </div>
+      <div class="share">
+        <span class="qr"><svg viewBox="0 0 25 25" shape-rendering="crispEdges" fill="#000" role="img" aria-label="Shareable link QR code"><rect x="8" y="0" width="1" height="1"/><rect x="9" y="0" width="1" height="1"/><rect x="15" y="0" width="1" height="1"/><rect x="16" y="0" width="1" height="1"/><rect x="8" y="1" width="1" height="1"/><rect x="9" y="1" width="1" height="1"/><rect x="10" y="1" width="1" height="1"/><rect x="14" y="1" width="1" height="1"/><rect x="15" y="1" width="1" height="1"/><rect x="16" y="1" width="1" height="1"/><rect x="8" y="2" width="1" height="1"/><rect x="10" y="2" width="1" height="1"/><rect x="11" y="2" width="1" height="1"/><rect x="12" y="2" width="1" height="1"/><rect x="13" y="2" width="1" height="1"/><rect x="14" y="2" width="1" height="1"/><rect x="15" y="2" width="1" height="1"/><rect x="16" y="2" width="1" height="1"/><rect x="9" y="3" width="1" height="1"/><rect x="11" y="3" width="1" height="1"/><rect x="12" y="3" width="1" height="1"/><rect x="14" y="3" width="1" height="1"/><rect x="15" y="3" width="1" height="1"/><rect x="8" y="4" width="1" height="1"/><rect x="9" y="4" width="1" height="1"/><rect x="11" y="4" width="1" height="1"/><rect x="15" y="4" width="1" height="1"/><rect x="16" y="4" width="1" height="1"/><rect x="8" y="5" width="1" height="1"/><rect x="9" y="5" width="1" height="1"/><rect x="10" y="5" width="1" height="1"/><rect x="11" y="5" width="1" height="1"/><rect x="12" y="5" width="1" height="1"/><rect x="13" y="5" width="1" height="1"/><rect x="14" y="5" width="1" height="1"/><rect x="15" y="5" width="1" height="1"/><rect x="16" y="5" width="1" height="1"/><rect x="9" y="6" width="1" height="1"/><rect x="13" y="6" width="1" height="1"/><rect x="14" y="6" width="1" height="1"/><rect x="8" y="7" width="1" height="1"/><rect x="10" y="7" width="1" height="1"/><rect x="16" y="7" width="1" height="1"/><rect x="0" y="8" width="1" height="1"/><rect x="2" y="8" width="1" height="1"/><rect x="6" y="8" width="1" height="1"/><rect x="7" y="8" width="1" height="1"/><rect x="8" y="8" width="1" height="1"/><rect x="10" y="8" width="1" height="1"/><rect x="13" y="8" width="1" height="1"/><rect x="14" y="8" width="1" height="1"/><rect x="16" y="8" width="1" height="1"/><rect x="21" y="8" width="1" height="1"/><rect x="24" y="8" width="1" height="1"/><rect x="0" y="9" width="1" height="1"/><rect x="2" y="9" width="1" height="1"/><rect x="5" y="9" width="1" height="1"/><rect x="6" y="9" width="1" height="1"/><rect x="7" y="9" width="1" height="1"/><rect x="9" y="9" width="1" height="1"/><rect x="10" y="9" width="1" height="1"/><rect x="11" y="9" width="1" height="1"/><rect x="12" y="9" width="1" height="1"/><rect x="14" y="9" width="1" height="1"/><rect x="15" y="9" width="1" height="1"/><rect x="16" y="9" width="1" height="1"/><rect x="17" y="9" width="1" height="1"/><rect x="18" y="9" width="1" height="1"/><rect x="19" y="9" width="1" height="1"/><rect x="21" y="9" width="1" height="1"/><rect x="22" y="9" width="1" height="1"/><rect x="24" y="9" width="1" height="1"/><rect x="1" y="10" width="1" height="1"/><rect x="4" y="10" width="1" height="1"/><rect x="5" y="10" width="1" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="11" y="10" width="1" height="1"/><rect x="12" y="10" width="1" height="1"/><rect x="13" y="10" width="1" height="1"/><rect x="15" y="10" width="1" height="1"/><rect x="16" y="10" width="1" height="1"/><rect x="17" y="10" width="1" height="1"/><rect x="19" y="10" width="1" height="1"/><rect x="21" y="10" width="1" height="1"/><rect x="23" y="10" width="1" height="1"/><rect x="24" y="10" width="1" height="1"/><rect x="2" y="11" width="1" height="1"/><rect x="3" y="11" width="1" height="1"/><rect x="7" y="11" width="1" height="1"/><rect x="8" y="11" width="1" height="1"/><rect x="9" y="11" width="1" height="1"/><rect x="11" y="11" width="1" height="1"/><rect x="14" y="11" width="1" height="1"/><rect x="17" y="11" width="1" height="1"/><rect x="18" y="11" width="1" height="1"/><rect x="22" y="11" width="1" height="1"/><rect x="23" y="11" width="1" height="1"/><rect x="0" y="12" width="1" height="1"/><rect x="1" y="12" width="1" height="1"/><rect x="2" y="12" width="1" height="1"/><rect x="3" y="12" width="1" height="1"/><rect x="6" y="12" width="1" height="1"/><rect x="7" y="12" width="1" height="1"/><rect x="9" y="12" width="1" height="1"/><rect x="10" y="12" width="1" height="1"/><rect x="13" y="12" width="1" height="1"/><rect x="14" y="12" width="1" height="1"/><rect x="15" y="12" width="1" height="1"/><rect x="16" y="12" width="1" height="1"/><rect x="21" y="12" width="1" height="1"/><rect x="23" y="12" width="1" height="1"/><rect x="24" y="12" width="1" height="1"/><rect x="1" y="13" width="1" height="1"/><rect x="2" y="13" width="1" height="1"/><rect x="3" y="13" width="1" height="1"/><rect x="5" y="13" width="1" height="1"/><rect x="10" y="13" width="1" height="1"/><rect x="12" y="13" width="1" height="1"/><rect x="14" y="13" width="1" height="1"/><rect x="17" y="13" width="1" height="1"/><rect x="18" y="13" width="1" height="1"/><rect x="20" y="13" width="1" height="1"/><rect x="21" y="13" width="1" height="1"/><rect x="23" y="13" width="1" height="1"/><rect x="24" y="13" width="1" height="1"/><rect x="0" y="14" width="1" height="1"/><rect x="1" y="14" width="1" height="1"/><rect x="2" y="14" width="1" height="1"/><rect x="3" y="14" width="1" height="1"/><rect x="4" y="14" width="1" height="1"/><rect x="5" y="14" width="1" height="1"/><rect x="6" y="14" width="1" height="1"/><rect x="10" y="14" width="1" height="1"/><rect x="13" y="14" width="1" height="1"/><rect x="14" y="14" width="1" height="1"/><rect x="16" y="14" width="1" height="1"/><rect x="18" y="14" width="1" height="1"/><rect x="20" y="14" width="1" height="1"/><rect x="21" y="14" width="1" height="1"/><rect x="22" y="14" width="1" height="1"/><rect x="23" y="14" width="1" height="1"/><rect x="0" y="15" width="1" height="1"/><rect x="1" y="15" width="1" height="1"/><rect x="3" y="15" width="1" height="1"/><rect x="4" y="15" width="1" height="1"/><rect x="10" y="15" width="1" height="1"/><rect x="12" y="15" width="1" height="1"/><rect x="21" y="15" width="1" height="1"/><rect x="22" y="15" width="1" height="1"/><rect x="23" y="15" width="1" height="1"/><rect x="24" y="15" width="1" height="1"/><rect x="0" y="16" width="1" height="1"/><rect x="4" y="16" width="1" height="1"/><rect x="5" y="16" width="1" height="1"/><rect x="7" y="16" width="1" height="1"/><rect x="8" y="16" width="1" height="1"/><rect x="9" y="16" width="1" height="1"/><rect x="11" y="16" width="1" height="1"/><rect x="16" y="16" width="1" height="1"/><rect x="23" y="16" width="1" height="1"/><rect x="24" y="16" width="1" height="1"/><rect x="8" y="17" width="1" height="1"/><rect x="10" y="17" width="1" height="1"/><rect x="11" y="17" width="1" height="1"/><rect x="12" y="17" width="1" height="1"/><rect x="13" y="17" width="1" height="1"/><rect x="16" y="17" width="1" height="1"/><rect x="17" y="17" width="1" height="1"/><rect x="20" y="17" width="1" height="1"/><rect x="23" y="17" width="1" height="1"/><rect x="8" y="18" width="1" height="1"/><rect x="9" y="18" width="1" height="1"/><rect x="11" y="18" width="1" height="1"/><rect x="14" y="18" width="1" height="1"/><rect x="15" y="18" width="1" height="1"/><rect x="19" y="18" width="1" height="1"/><rect x="21" y="18" width="1" height="1"/><rect x="23" y="18" width="1" height="1"/><rect x="9" y="19" width="1" height="1"/><rect x="11" y="19" width="1" height="1"/><rect x="13" y="19" width="1" height="1"/><rect x="15" y="19" width="1" height="1"/><rect x="17" y="19" width="1" height="1"/><rect x="18" y="19" width="1" height="1"/><rect x="19" y="19" width="1" height="1"/><rect x="20" y="19" width="1" height="1"/><rect x="23" y="19" width="1" height="1"/><rect x="24" y="19" width="1" height="1"/><rect x="9" y="20" width="1" height="1"/><rect x="12" y="20" width="1" height="1"/><rect x="14" y="20" width="1" height="1"/><rect x="16" y="20" width="1" height="1"/><rect x="19" y="20" width="1" height="1"/><rect x="22" y="20" width="1" height="1"/><rect x="9" y="21" width="1" height="1"/><rect x="12" y="21" width="1" height="1"/><rect x="14" y="21" width="1" height="1"/><rect x="16" y="21" width="1" height="1"/><rect x="17" y="21" width="1" height="1"/><rect x="21" y="21" width="1" height="1"/><rect x="23" y="21" width="1" height="1"/><rect x="24" y="21" width="1" height="1"/><rect x="9" y="22" width="1" height="1"/><rect x="10" y="22" width="1" height="1"/><rect x="11" y="22" width="1" height="1"/><rect x="12" y="22" width="1" height="1"/><rect x="14" y="22" width="1" height="1"/><rect x="15" y="22" width="1" height="1"/><rect x="18" y="22" width="1" height="1"/><rect x="19" y="22" width="1" height="1"/><rect x="20" y="22" width="1" height="1"/><rect x="21" y="22" width="1" height="1"/><rect x="23" y="22" width="1" height="1"/><rect x="24" y="22" width="1" height="1"/><rect x="8" y="23" width="1" height="1"/><rect x="11" y="23" width="1" height="1"/><rect x="15" y="23" width="1" height="1"/><rect x="17" y="23" width="1" height="1"/><rect x="19" y="23" width="1" height="1"/><rect x="20" y="23" width="1" height="1"/><rect x="21" y="23" width="1" height="1"/><rect x="9" y="24" width="1" height="1"/><rect x="10" y="24" width="1" height="1"/><rect x="14" y="24" width="1" height="1"/><rect x="15" y="24" width="1" height="1"/><rect x="17" y="24" width="1" height="1"/><rect x="22" y="24" width="1" height="1"/><rect x="23" y="24" width="1" height="1"/><rect x="24" y="24" width="1" height="1"/><rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="#fff"/><rect x="2" y="2" width="3" height="3"/><rect x="18" y="0" width="7" height="7"/><rect x="19" y="1" width="5" height="5" fill="#fff"/><rect x="20" y="2" width="3" height="3"/><rect x="0" y="18" width="7" height="7"/><rect x="1" y="19" width="5" height="5" fill="#fff"/><rect x="2" y="20" width="3" height="3"/></svg></span>
+        <code>Scanned at the door with Bumpy Access</code>
+      </div>
+    </div>
+  </div>
+</div>
+</div></div></section><section class="pg" data-pg="events" hidden>
+<aside class="side">
+  <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
+  <nav class="nav">
+    <a class="nav-a on" data-go="events"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Events</a>
+    <a class="nav-a" data-go="products"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8"/></svg>Store</a>
+    <div class="subnav" hidden>
+      <a class="nav-a" data-go="products">Products</a>
+      <a class="nav-a" data-go="orders">Orders</a>
+    </div>
+    <a class="nav-a" data-go="analytics"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Analytics</a>
+    <a class="nav-a" data-go="settings"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Settings</a>
+  </nav>
+  <div class="side-foot"><span>Bumpy Partner</span></div>
+</aside>
+<div class="main"><div class="content">
+<div class="ph"><div><h1>Events</h1><p>Not part of this prototype.</p></div></div>
+<div class="card"><div class="empty"><h3>Outside the Store prototype</h3>
+<p>This is the existing Events section of the partner dashboard.</p>
+<button class="btn" data-go="products">Back to Products</button></div></div>
+</div></div></section><section class="pg" data-pg="analytics" hidden>
+<aside class="side">
+  <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
+  <nav class="nav">
+    <a class="nav-a" data-go="events"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Events</a>
+    <a class="nav-a" data-go="products"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8"/></svg>Store</a>
+    <div class="subnav" hidden>
+      <a class="nav-a" data-go="products">Products</a>
+      <a class="nav-a" data-go="orders">Orders</a>
+    </div>
+    <a class="nav-a on" data-go="analytics"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Analytics</a>
+    <a class="nav-a" data-go="settings"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Settings</a>
+  </nav>
+  <div class="side-foot"><span>Bumpy Partner</span></div>
+</aside>
+<div class="main"><div class="content">
+<div class="ph"><div><h1>Analytics</h1><p>Not part of this prototype.</p></div></div>
+<div class="card"><div class="empty"><h3>Outside the Store prototype</h3>
+<p>This is the existing Analytics section of the partner dashboard.</p>
+<button class="btn" data-go="products">Back to Products</button></div></div>
+</div></div></section><section class="pg" data-pg="settings" hidden>
+<aside class="side">
+  <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
+  <nav class="nav">
+    <a class="nav-a" data-go="events"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Events</a>
+    <a class="nav-a" data-go="products"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8"/></svg>Store</a>
+    <div class="subnav" hidden>
+      <a class="nav-a" data-go="products">Products</a>
+      <a class="nav-a" data-go="orders">Orders</a>
+    </div>
+    <a class="nav-a" data-go="analytics"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Analytics</a>
+    <a class="nav-a on" data-go="settings"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Settings</a>
+  </nav>
+  <div class="side-foot"><span>Bumpy Partner</span></div>
+</aside>
+<div class="main"><div class="content">
+<div class="ph"><div><h1>Settings</h1><p>Not part of this prototype.</p></div></div>
+<div class="card"><div class="empty"><h3>Outside the Store prototype</h3>
+<p>This is the existing Settings section of the partner dashboard.</p>
+<button class="btn" data-go="products">Back to Products</button></div></div>
+</div></div></section>
+<script>
+  var KEYS = ['products', 'create', 'detail', 'edit', 'orders', 'order', 'events', 'analytics', 'settings'];
+  function show(key, push){
+    if (KEYS.indexOf(key) < 0) key = "products";
+    document.querySelectorAll(".pg").forEach(function(s){ s.hidden = s.dataset.pg !== key; });
+    window.scrollTo(0, 0);
+    if (push !== false) history.pushState({k: key}, "", "#" + key);
+  }
+  window.addEventListener("popstate", function(e){ show((e.state && e.state.k) || "products", false); });
+  document.addEventListener("click", function(e){
+    if (e.target.closest("[data-stop]")) { e.preventDefault(); e.stopPropagation(); return; }
+    var el = e.target.closest("[data-go]");
+    if (!el) return;
+    e.preventDefault();
+    show(el.dataset.go);
+  });
+  var start = (location.hash || "#products").slice(1);
+  history.replaceState({k: start}, "", "#" + start);
+  show(start, false);
+</script>
+</body></html>
