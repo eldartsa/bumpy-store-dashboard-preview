@@ -168,8 +168,48 @@
   .sec-lbl{font-size:12px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;
     letter-spacing:.04em;margin:0 0 8px}
 
+  .fld input.bad,.fld textarea.bad{border-color:var(--fg-error);background:#fff}
+  .err{display:none;color:var(--fg-error);font-size:12px;margin-top:4px}
+  .err.on{display:block}
+
+  /* Live preview of the buyer's card. A store item has no browse surface, so
+     the card IS how it gets seen — the seller should watch it build as they
+     type rather than guess and check on the public page. */
+  /* The preview is a fragment of the storefront, so it carries the
+     storefront's surface, not the panel's. */
+  .prev{border:1px solid rgba(255,255,255,.09);border-radius:var(--r-lg);overflow:hidden;background:#050507}
+  .prev .art{aspect-ratio:4/3;background:#141416;position:relative;overflow:hidden}
+  .prev .art svg{display:block;width:100%;height:100%}
+  .prev .art .ph-art{display:grid;place-items:center;height:100%;color:#52525b;font-size:12px}
+  .prev .bd{padding:10px 12px 12px}
+  .prev h4{margin:0;font-size:14px;font-weight:600;color:#f6f5f4;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .prev .d{color:#a8a29e;font-size:12px;margin-top:2px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .prev .p{color:#f6f5f4;font-size:13px;font-weight:700;margin-top:8px}
+  .prev .p small{color:#8a8481;font-weight:500}
+  .prev .left{color:#ffc46b;font-size:12px;font-weight:500;margin-top:3px}
+  .prev-wrap{background:#0a0a0c;padding:14px;border-radius:var(--r-lg)}
+  .prev-note{color:var(--fg-muted);font-size:12px;margin:8px 0 0;text-align:center}
+
+  /* Published moment */
+  .done{text-align:center;padding:34px 20px 26px}
+  .done .tick{width:44px;height:44px;border-radius:50%;background:var(--tag-green-bg);
+    color:var(--tag-green-text);display:grid;place-items:center;margin:0 auto 12px}
+  .done h2{font-size:17px;font-weight:600;margin:0 0 4px}
+  .done p{margin:0;color:var(--fg-muted);font-size:13px}
+  .done-acts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+  .step-dots{display:flex;align-items:center;gap:6px;color:var(--fg-muted);font-size:12px;margin-bottom:10px}
+  .step-dots b{color:var(--fg-base);font-weight:500}
+
   .pg{display:flex;min-height:100vh}
   .pg[hidden]{display:none}
+  /* toast: the panel confirms an action without stealing the screen */
+  #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(8px);
+    background:var(--button-inverted);color:var(--fg-on-color);font-size:13px;font-weight:500;
+    padding:9px 14px;border-radius:8px;box-shadow:var(--shadow-pop);opacity:0;pointer-events:none;
+    transition:opacity .18s ease,transform .18s ease;z-index:60;max-width:90vw}
+  #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head><body>
 
@@ -199,70 +239,7 @@
   </nav>
   <div class="side-foot"><span>Bumpy Partner</span></div>
 </aside>
-<div class="main"><div class="content">
-<div class="ph">
-  <div><h1>Products</h1><p>Things you sell that aren't events — trips, add-ons, merch.</p></div>
-  <button class="btn primary" data-go="create"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>New product</button>
-</div>
-
-<div class="card">
-  <div class="bar">
-    <input class="search" placeholder="Search products">
-    <select class="filter"><option>All statuses</option><option>Published</option><option>Draft</option><option>Archived</option></select>
-  </div>
-  <div class="tbl-wrap"><table class="tbl wide">
-    <thead><tr>
-      <th>Product</th><th class="num">Price</th><th class="num">Sold</th>
-      <th class="num">Remaining</th><th>Status</th><th></th>
-    </tr></thead>
-    <tbody>
-      <tr data-go="detail" data-id="sti_01">
-        <td><span class="cell-t"><span class="thumb" style="width:32px;height:32px"><svg viewBox="0 0 100 100"><use href="#a-island"/></svg></span><span class="t-name">Island Day Trip — Koh Larn</span></span></td>
-        <td class="num">2,400 THB</td>
-        <td class="num">21</td>
-        <td class="num">3</td>
-        <td><span class="badge b-green"><i></i>Published</span></td>
-        <td class="num"><button class="btn sm" data-stop><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Copy link</button></td>
-      </tr>
-      <tr data-go="detail" data-id="sti_02">
-        <td><span class="cell-t"><span class="thumb" style="width:32px;height:32px"><svg viewBox="0 0 100 100"><use href="#a-boat"/></svg></span><span class="t-name">Sunset Boat Party</span></span></td>
-        <td class="num">1,800 THB</td>
-        <td class="num">34</td>
-        <td class="num">26</td>
-        <td><span class="badge b-green"><i></i>Published</span></td>
-        <td class="num"><button class="btn sm" data-stop><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Copy link</button></td>
-      </tr>
-      <tr data-go="detail" data-id="sti_03">
-        <td><span class="cell-t"><span class="thumb" style="width:32px;height:32px"><svg viewBox="0 0 100 100"><use href="#a-tee"/></svg></span><span class="t-name">Afterlight Tee — Eclipse</span></span></td>
-        <td class="num">890 THB</td>
-        <td class="num">47</td>
-        <td class="num">73</td>
-        <td><span class="badge b-green"><i></i>Published</span></td>
-        <td class="num"><button class="btn sm" data-stop><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Copy link</button></td>
-      </tr>
-      <tr data-go="detail" data-id="sti_04">
-        <td><span class="cell-t"><span class="thumb" style="width:32px;height:32px"><svg viewBox="0 0 100 100"><use href="#a-transfer"/></svg></span><span class="t-name">Airport Transfer BKK ⇄ Sukhumvit</span></span></td>
-        <td class="num">650 THB</td>
-        <td class="num">12</td>
-        <td class="num"><span class="muted">—</span></td>
-        <td><span class="badge b-neutral"><i></i>Draft</span></td>
-        <td class="num"><button class="btn sm" data-stop><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Copy link</button></td>
-      </tr></tbody>
-  </table></div>
-</div>
-
-<!-- The empty state is what a new seller actually lands on, so it carries the
-     create action rather than sending them back to the header button. -->
-<div class="card" style="margin-top:16px">
-  <div class="card-h"><div><h2>Empty state</h2>
-    <p class="sub">What this page looks like before the first product exists</p></div></div>
-  <div class="empty">
-    <h3>No products yet</h3>
-    <p>Sell a trip, an add-on, or merch alongside your events.</p>
-    <button class="btn primary" data-go="create"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>New product</button>
-  </div>
-</div>
-</div></div></section><section class="pg" data-pg="create" hidden>
+<div class="main"><div class="content" id="c-products"></div></div></section><section class="pg" data-pg="create" hidden>
 <aside class="side">
   <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
   <nav class="nav">
@@ -277,58 +254,7 @@
   </nav>
   <div class="side-foot"><span>Bumpy Partner</span></div>
 </aside>
-<div class="main"><div class="content">
-<div class="crumb"><a data-go="products">Products</a><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>New product</span></div>
-<div class="ph">
-  <div><h1>New product</h1>
-    <p>Title, description and price. That's the whole thing.</p></div>
-</div>
-
-<div class="two">
-  <div class="card">
-    <div class="card-b">
-      <div class="fld">
-        <label for="f-t">Title</label>
-        <input id="f-t" value="" placeholder="e.g. Island Day Trip — Koh Larn, 4 Sep">
-      </div>
-      <p class="help">There is no date field. If your item runs on a day, put the day in the title.</p>
-
-      <div class="fld">
-        <label for="f-d">Description</label>
-        <textarea id="f-d" placeholder="What the buyer gets."></textarea>
-      </div>
-      <p class="help">This is the only body copy on the public page — say what's included and what isn't.</p>
-
-      <div class="fld-row">
-        <div class="fld"><label for="f-p">Price <span class="hint">THB</span></label>
-          <input id="f-p" inputmode="numeric" value="" placeholder="0"></div>
-        <div class="fld"><label for="f-q">Quantity available</label>
-          <input id="f-q" inputmode="numeric" value="" placeholder="0"></div>
-      </div>
-      <p class="help">Quantity drives “Only N left” and sold-out on the public page.</p>
-
-      <div class="fld"><label for="f-s">Status</label>
-        <select id="f-s"><option selected>Draft</option><option>Published</option></select></div>
-    </div>
-  </div>
-
-  <div>
-    <div class="card">
-      <div class="card-h"><h2>Image</h2></div>
-      <div class="card-b">
-        
-        <div class="drop">Drop an image, or click to upload<br><span style="font-size:12px">JPG or PNG, square works best</span></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-b" style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn primary" data-go="products">Create product</button>
-        <button class="btn" data-go="products">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
-</div></div></section><section class="pg" data-pg="detail" hidden>
+<div class="main"><div class="content" id="c-create"></div></div></section><section class="pg" data-pg="created" hidden>
 <aside class="side">
   <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
   <nav class="nav">
@@ -343,75 +269,7 @@
   </nav>
   <div class="side-foot"><span>Bumpy Partner</span></div>
 </aside>
-<div class="main"><div class="content">
-<div class="crumb"><a data-go="products">Products</a><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Island Day Trip — Koh Larn</span></div>
-<div class="ph">
-  <div><h1>Island Day Trip — Koh Larn</h1><p><span class="badge b-green"><i></i>Published</span></p></div>
-  <div style="display:flex;gap:8px">
-    <button class="btn" data-go="edit">Edit</button>
-    <button class="btn">Unpublish</button>
-  </div>
-</div>
-
-<!-- Real numbers only: sold and remaining come from purchase rows, revenue is
-     what was actually captured. Nothing modelled or projected. -->
-<div class="card">
-  <div class="stats">
-    <div class="stat"><div class="k">Sold</div><div class="v">21</div></div>
-    <div class="stat"><div class="k">Revenue</div><div class="v">5,088 THB</div></div>
-    <div class="stat"><div class="k">Remaining</div><div class="v">3</div></div>
-  </div>
-</div>
-
-<div class="two" style="margin-top:16px">
-  <div class="card">
-    <div class="card-h"><h2>Orders for this product</h2>
-      <button class="btn sm" data-go="orders">View all</button></div>
-    <div class="tbl-wrap"><table class="tbl">
-      <thead><tr><th>Order</th><th>Buyer</th><th class="num">Amount</th>
-        <th>Payment</th><th class="num">Date</th></tr></thead>
-      <tbody>
-      <tr data-go="order" data-id="2117">
-        <td><span class="t-name">#2117</span></td>
-        <td><span class="t-name">Eldar Tsabari</span><div class="t-sub">eldar@example.com</div></td>
-        <td class="num">5,088 THB</td>
-        <td><span class="badge b-green"><i></i>Paid</span></td>
-        <td class="num muted">30 Aug, 14:02</td>
-      </tr>
-      <tr data-go="order" data-id="2114">
-        <td><span class="t-name">#2114</span></td>
-        <td><span class="t-name">Noa Barak</span><div class="t-sub">noa@example.com</div></td>
-        <td class="num">2,544 THB</td>
-        <td><span class="badge b-neutral"><i></i>Refunded</span></td>
-        <td class="num muted">29 Aug, 18:33</td>
-      </tr></tbody>
-    </table></div>
-  </div>
-
-  <div>
-    <div class="card">
-      <div class="card-h"><h2>Details</h2></div>
-      <div style="border-bottom:1px solid var(--border-base);height:150px;overflow:hidden">
-        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"
-             style="display:block;width:100%;height:100%"><use href="#a-island"/></svg>
-      </div>
-      <div class="card-b">
-        <p style="margin:0 0 12px;color:var(--fg-subtle);font-size:13px">A full day off the mainland with the Afterlight crew. Speedboat out at first light, two beaches before the day-trip boats arrive, lunch on the sand, and back in time for the evening set.</p>
-        <div class="kv"><span class="k">Price</span><span class="v">2,400 THB</span></div>
-        <div class="kv"><span class="k">Quantity</span><span class="v">24</span></div>
-        <div class="kv"><span class="k">Status</span><span class="v"><span class="badge b-green"><i></i>Published</span></span></div>
-      </div>
-      <!-- A store item has no browse surface — it is reached by link, exactly
-           as an event is. So the link is a first-class thing on this page. -->
-      <div class="share">
-        <span class="qr"><svg viewBox="0 0 25 25" shape-rendering="crispEdges" fill="#000" role="img" aria-label="Shareable link QR code"><rect x="8" y="0" width="1" height="1"/><rect x="11" y="0" width="1" height="1"/><rect x="12" y="0" width="1" height="1"/><rect x="13" y="0" width="1" height="1"/><rect x="15" y="0" width="1" height="1"/><rect x="16" y="0" width="1" height="1"/><rect x="10" y="1" width="1" height="1"/><rect x="11" y="1" width="1" height="1"/><rect x="15" y="1" width="1" height="1"/><rect x="16" y="1" width="1" height="1"/><rect x="8" y="2" width="1" height="1"/><rect x="11" y="2" width="1" height="1"/><rect x="12" y="2" width="1" height="1"/><rect x="13" y="2" width="1" height="1"/><rect x="16" y="2" width="1" height="1"/><rect x="8" y="3" width="1" height="1"/><rect x="9" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="13" y="3" width="1" height="1"/><rect x="15" y="3" width="1" height="1"/><rect x="8" y="4" width="1" height="1"/><rect x="11" y="4" width="1" height="1"/><rect x="12" y="4" width="1" height="1"/><rect x="13" y="4" width="1" height="1"/><rect x="15" y="4" width="1" height="1"/><rect x="8" y="5" width="1" height="1"/><rect x="9" y="5" width="1" height="1"/><rect x="12" y="5" width="1" height="1"/><rect x="13" y="5" width="1" height="1"/><rect x="15" y="5" width="1" height="1"/><rect x="8" y="6" width="1" height="1"/><rect x="9" y="6" width="1" height="1"/><rect x="11" y="6" width="1" height="1"/><rect x="12" y="6" width="1" height="1"/><rect x="15" y="6" width="1" height="1"/><rect x="16" y="6" width="1" height="1"/><rect x="8" y="7" width="1" height="1"/><rect x="10" y="7" width="1" height="1"/><rect x="11" y="7" width="1" height="1"/><rect x="1" y="8" width="1" height="1"/><rect x="4" y="8" width="1" height="1"/><rect x="5" y="8" width="1" height="1"/><rect x="6" y="8" width="1" height="1"/><rect x="7" y="8" width="1" height="1"/><rect x="9" y="8" width="1" height="1"/><rect x="11" y="8" width="1" height="1"/><rect x="12" y="8" width="1" height="1"/><rect x="14" y="8" width="1" height="1"/><rect x="15" y="8" width="1" height="1"/><rect x="16" y="8" width="1" height="1"/><rect x="19" y="8" width="1" height="1"/><rect x="21" y="8" width="1" height="1"/><rect x="23" y="8" width="1" height="1"/><rect x="3" y="9" width="1" height="1"/><rect x="9" y="9" width="1" height="1"/><rect x="11" y="9" width="1" height="1"/><rect x="14" y="9" width="1" height="1"/><rect x="15" y="9" width="1" height="1"/><rect x="17" y="9" width="1" height="1"/><rect x="18" y="9" width="1" height="1"/><rect x="19" y="9" width="1" height="1"/><rect x="20" y="9" width="1" height="1"/><rect x="23" y="9" width="1" height="1"/><rect x="24" y="9" width="1" height="1"/><rect x="0" y="10" width="1" height="1"/><rect x="1" y="10" width="1" height="1"/><rect x="2" y="10" width="1" height="1"/><rect x="3" y="10" width="1" height="1"/><rect x="6" y="10" width="1" height="1"/><rect x="8" y="10" width="1" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="16" y="10" width="1" height="1"/><rect x="17" y="10" width="1" height="1"/><rect x="18" y="10" width="1" height="1"/><rect x="19" y="10" width="1" height="1"/><rect x="21" y="10" width="1" height="1"/><rect x="22" y="10" width="1" height="1"/><rect x="24" y="10" width="1" height="1"/><rect x="2" y="11" width="1" height="1"/><rect x="4" y="11" width="1" height="1"/><rect x="6" y="11" width="1" height="1"/><rect x="12" y="11" width="1" height="1"/><rect x="13" y="11" width="1" height="1"/><rect x="14" y="11" width="1" height="1"/><rect x="15" y="11" width="1" height="1"/><rect x="16" y="11" width="1" height="1"/><rect x="17" y="11" width="1" height="1"/><rect x="18" y="11" width="1" height="1"/><rect x="19" y="11" width="1" height="1"/><rect x="20" y="11" width="1" height="1"/><rect x="21" y="11" width="1" height="1"/><rect x="23" y="11" width="1" height="1"/><rect x="24" y="11" width="1" height="1"/><rect x="1" y="12" width="1" height="1"/><rect x="2" y="12" width="1" height="1"/><rect x="3" y="12" width="1" height="1"/><rect x="4" y="12" width="1" height="1"/><rect x="6" y="12" width="1" height="1"/><rect x="9" y="12" width="1" height="1"/><rect x="14" y="12" width="1" height="1"/><rect x="16" y="12" width="1" height="1"/><rect x="17" y="12" width="1" height="1"/><rect x="18" y="12" width="1" height="1"/><rect x="19" y="12" width="1" height="1"/><rect x="21" y="12" width="1" height="1"/><rect x="22" y="12" width="1" height="1"/><rect x="1" y="13" width="1" height="1"/><rect x="2" y="13" width="1" height="1"/><rect x="3" y="13" width="1" height="1"/><rect x="5" y="13" width="1" height="1"/><rect x="6" y="13" width="1" height="1"/><rect x="7" y="13" width="1" height="1"/><rect x="9" y="13" width="1" height="1"/><rect x="11" y="13" width="1" height="1"/><rect x="12" y="13" width="1" height="1"/><rect x="16" y="13" width="1" height="1"/><rect x="22" y="13" width="1" height="1"/><rect x="23" y="13" width="1" height="1"/><rect x="24" y="13" width="1" height="1"/><rect x="1" y="14" width="1" height="1"/><rect x="2" y="14" width="1" height="1"/><rect x="3" y="14" width="1" height="1"/><rect x="4" y="14" width="1" height="1"/><rect x="6" y="14" width="1" height="1"/><rect x="7" y="14" width="1" height="1"/><rect x="8" y="14" width="1" height="1"/><rect x="9" y="14" width="1" height="1"/><rect x="11" y="14" width="1" height="1"/><rect x="14" y="14" width="1" height="1"/><rect x="15" y="14" width="1" height="1"/><rect x="16" y="14" width="1" height="1"/><rect x="17" y="14" width="1" height="1"/><rect x="18" y="14" width="1" height="1"/><rect x="19" y="14" width="1" height="1"/><rect x="20" y="14" width="1" height="1"/><rect x="21" y="14" width="1" height="1"/><rect x="22" y="14" width="1" height="1"/><rect x="23" y="14" width="1" height="1"/><rect x="1" y="15" width="1" height="1"/><rect x="2" y="15" width="1" height="1"/><rect x="3" y="15" width="1" height="1"/><rect x="5" y="15" width="1" height="1"/><rect x="6" y="15" width="1" height="1"/><rect x="9" y="15" width="1" height="1"/><rect x="10" y="15" width="1" height="1"/><rect x="12" y="15" width="1" height="1"/><rect x="15" y="15" width="1" height="1"/><rect x="16" y="15" width="1" height="1"/><rect x="17" y="15" width="1" height="1"/><rect x="18" y="15" width="1" height="1"/><rect x="20" y="15" width="1" height="1"/><rect x="23" y="15" width="1" height="1"/><rect x="1" y="16" width="1" height="1"/><rect x="3" y="16" width="1" height="1"/><rect x="6" y="16" width="1" height="1"/><rect x="7" y="16" width="1" height="1"/><rect x="11" y="16" width="1" height="1"/><rect x="12" y="16" width="1" height="1"/><rect x="13" y="16" width="1" height="1"/><rect x="16" y="16" width="1" height="1"/><rect x="17" y="16" width="1" height="1"/><rect x="20" y="16" width="1" height="1"/><rect x="21" y="16" width="1" height="1"/><rect x="22" y="16" width="1" height="1"/><rect x="23" y="16" width="1" height="1"/><rect x="24" y="16" width="1" height="1"/><rect x="8" y="17" width="1" height="1"/><rect x="10" y="17" width="1" height="1"/><rect x="13" y="17" width="1" height="1"/><rect x="15" y="17" width="1" height="1"/><rect x="18" y="17" width="1" height="1"/><rect x="24" y="17" width="1" height="1"/><rect x="8" y="18" width="1" height="1"/><rect x="10" y="18" width="1" height="1"/><rect x="11" y="18" width="1" height="1"/><rect x="19" y="18" width="1" height="1"/><rect x="23" y="18" width="1" height="1"/><rect x="24" y="18" width="1" height="1"/><rect x="8" y="19" width="1" height="1"/><rect x="9" y="19" width="1" height="1"/><rect x="10" y="19" width="1" height="1"/><rect x="15" y="19" width="1" height="1"/><rect x="16" y="19" width="1" height="1"/><rect x="21" y="19" width="1" height="1"/><rect x="24" y="19" width="1" height="1"/><rect x="8" y="20" width="1" height="1"/><rect x="9" y="20" width="1" height="1"/><rect x="10" y="20" width="1" height="1"/><rect x="11" y="20" width="1" height="1"/><rect x="12" y="20" width="1" height="1"/><rect x="14" y="20" width="1" height="1"/><rect x="18" y="20" width="1" height="1"/><rect x="21" y="20" width="1" height="1"/><rect x="24" y="20" width="1" height="1"/><rect x="8" y="21" width="1" height="1"/><rect x="9" y="21" width="1" height="1"/><rect x="10" y="21" width="1" height="1"/><rect x="16" y="21" width="1" height="1"/><rect x="8" y="22" width="1" height="1"/><rect x="9" y="22" width="1" height="1"/><rect x="10" y="22" width="1" height="1"/><rect x="11" y="22" width="1" height="1"/><rect x="12" y="22" width="1" height="1"/><rect x="13" y="22" width="1" height="1"/><rect x="14" y="22" width="1" height="1"/><rect x="15" y="22" width="1" height="1"/><rect x="16" y="22" width="1" height="1"/><rect x="19" y="22" width="1" height="1"/><rect x="21" y="22" width="1" height="1"/><rect x="23" y="22" width="1" height="1"/><rect x="24" y="22" width="1" height="1"/><rect x="9" y="23" width="1" height="1"/><rect x="10" y="23" width="1" height="1"/><rect x="12" y="23" width="1" height="1"/><rect x="19" y="23" width="1" height="1"/><rect x="20" y="23" width="1" height="1"/><rect x="21" y="23" width="1" height="1"/><rect x="24" y="23" width="1" height="1"/><rect x="8" y="24" width="1" height="1"/><rect x="9" y="24" width="1" height="1"/><rect x="10" y="24" width="1" height="1"/><rect x="12" y="24" width="1" height="1"/><rect x="13" y="24" width="1" height="1"/><rect x="14" y="24" width="1" height="1"/><rect x="15" y="24" width="1" height="1"/><rect x="16" y="24" width="1" height="1"/><rect x="17" y="24" width="1" height="1"/><rect x="21" y="24" width="1" height="1"/><rect x="23" y="24" width="1" height="1"/><rect x="24" y="24" width="1" height="1"/><rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="#fff"/><rect x="2" y="2" width="3" height="3"/><rect x="18" y="0" width="7" height="7"/><rect x="19" y="1" width="5" height="5" fill="#fff"/><rect x="20" y="2" width="3" height="3"/><rect x="0" y="18" width="7" height="7"/><rect x="1" y="19" width="5" height="5" fill="#fff"/><rect x="2" y="20" width="3" height="3"/></svg></span>
-        <code>bumpy.fm/s/island-day-trip-koh-larn</code>
-        <button class="btn sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Copy</button>
-      </div>
-    </div>
-  </div>
-</div>
-</div></div></section><section class="pg" data-pg="edit" hidden>
+<div class="main"><div class="content" id="c-created"></div></div></section><section class="pg" data-pg="detail" hidden>
 <aside class="side">
   <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
   <nav class="nav">
@@ -426,58 +284,22 @@
   </nav>
   <div class="side-foot"><span>Bumpy Partner</span></div>
 </aside>
-<div class="main"><div class="content">
-<div class="crumb"><a data-go="products">Products</a><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Edit</span></div>
-<div class="ph">
-  <div><h1>Edit product</h1>
-    <p>Title, description and price. That's the whole thing.</p></div>
-</div>
-
-<div class="two">
-  <div class="card">
-    <div class="card-b">
-      <div class="fld">
-        <label for="f-t">Title</label>
-        <input id="f-t" value="Island Day Trip — Koh Larn" placeholder="e.g. Island Day Trip — Koh Larn, 4 Sep">
-      </div>
-      <p class="help">There is no date field. If your item runs on a day, put the day in the title.</p>
-
-      <div class="fld">
-        <label for="f-d">Description</label>
-        <textarea id="f-d" placeholder="What the buyer gets.">A full day off the mainland with the Afterlight crew. Speedboat out at first light, two beaches before the day-trip boats arrive, lunch on the sand, and back in time for the evening set.</textarea>
-      </div>
-      <p class="help">This is the only body copy on the public page — say what's included and what isn't.</p>
-
-      <div class="fld-row">
-        <div class="fld"><label for="f-p">Price <span class="hint">THB</span></label>
-          <input id="f-p" inputmode="numeric" value="2400" placeholder="0"></div>
-        <div class="fld"><label for="f-q">Quantity available</label>
-          <input id="f-q" inputmode="numeric" value="24" placeholder="0"></div>
-      </div>
-      <p class="help">Quantity drives “Only N left” and sold-out on the public page.</p>
-
-      <div class="fld"><label for="f-s">Status</label>
-        <select id="f-s"><option>Draft</option><option selected>Published</option></select></div>
+<div class="main"><div class="content" id="c-detail"></div></div></section><section class="pg" data-pg="edit" hidden>
+<aside class="side">
+  <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
+  <nav class="nav">
+    <a class="nav-a" data-go="events"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Events</a>
+    <a class="nav-a on" data-go="products"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8"/></svg>Store</a>
+    <div class="subnav">
+      <a class="nav-a on" data-go="products">Products</a>
+      <a class="nav-a" data-go="orders">Orders</a>
     </div>
-  </div>
-
-  <div>
-    <div class="card">
-      <div class="card-h"><h2>Image</h2></div>
-      <div class="card-b">
-        <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border-base);margin-bottom:10px;height:140px"><svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" style="display:block;width:100%;height:100%"><use href="#a-island"/></svg></div>
-        <div class="drop">Drop an image, or click to upload<br><span style="font-size:12px">JPG or PNG, square works best</span></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-b" style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn primary" data-go="detail">Save changes</button>
-        <button class="btn" data-go="detail">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
-</div></div></section><section class="pg" data-pg="orders" hidden>
+    <a class="nav-a" data-go="analytics"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Analytics</a>
+    <a class="nav-a" data-go="settings"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Settings</a>
+  </nav>
+  <div class="side-foot"><span>Bumpy Partner</span></div>
+</aside>
+<div class="main"><div class="content" id="c-edit"></div></div></section><section class="pg" data-pg="orders" hidden>
 <aside class="side">
   <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
   <nav class="nav">
@@ -492,85 +314,7 @@
   </nav>
   <div class="side-foot"><span>Bumpy Partner</span></div>
 </aside>
-<div class="main"><div class="content">
-<div class="ph">
-  <div><h1>Orders</h1><p>Everything sold from your store, across every product.</p></div>
-  <button class="btn">Export</button>
-</div>
-
-<div class="card">
-  <div class="bar">
-    <input class="search" placeholder="Search by buyer, email or order number">
-    <select class="filter"><option>All products</option><option>Island Day Trip — Koh Larn</option><option>Sunset Boat Party</option><option>Afterlight Tee — Eclipse</option><option>Airport Transfer BKK ⇄ Sukhumvit</option></select>
-    <select class="filter"><option>All statuses</option><option>Paid</option><option>Pending</option><option>Refunded</option></select>
-  </div>
-  <div class="tbl-wrap"><table class="tbl wide">
-    <thead><tr><th>Order</th><th>Buyer</th><th>Product</th><th class="num">Qty</th>
-      <th class="num">Amount</th><th>Payment</th><th>Voucher</th><th class="num">Date</th></tr></thead>
-    <tbody>
-      <tr data-go="order" data-id="2117">
-        <td><span class="t-name">#2117</span></td>
-        <td><span class="t-name">Eldar Tsabari</span><div class="t-sub">eldar@example.com</div></td>
-        <td><span class="cell-t"><span class="thumb" style="width:26px;height:26px"><svg viewBox="0 0 100 100"><use href="#a-island"/></svg></span><span class="t-name">Island Day Trip — Koh Larn</span></span></td>
-        <td class="num">2</td>
-        <td class="num">5,088 THB</td>
-        <td><span class="badge b-green"><i></i>Paid</span></td>
-        <td><span class="badge b-blue"><i></i>Issued</span></td>
-        <td class="num muted">30 Aug, 14:02</td>
-      </tr>
-      <tr data-go="order" data-id="2116">
-        <td><span class="t-name">#2116</span></td>
-        <td><span class="t-name">Maya Cohen</span><div class="t-sub">maya@example.com</div></td>
-        <td><span class="cell-t"><span class="thumb" style="width:26px;height:26px"><svg viewBox="0 0 100 100"><use href="#a-tee"/></svg></span><span class="t-name">Afterlight Tee — Eclipse</span></span></td>
-        <td class="num">1</td>
-        <td class="num">943 THB</td>
-        <td><span class="badge b-green"><i></i>Paid</span></td>
-        <td><span class="badge b-green"><i></i>Redeemed</span></td>
-        <td class="num muted">30 Aug, 11:47</td>
-      </tr>
-      <tr data-go="order" data-id="2115">
-        <td><span class="t-name">#2115</span></td>
-        <td><span class="t-name">Tom Alperin</span><div class="t-sub">tom@example.com</div></td>
-        <td><span class="cell-t"><span class="thumb" style="width:26px;height:26px"><svg viewBox="0 0 100 100"><use href="#a-boat"/></svg></span><span class="t-name">Sunset Boat Party</span></span></td>
-        <td class="num">4</td>
-        <td class="num">7,632 THB</td>
-        <td><span class="badge b-green"><i></i>Paid</span></td>
-        <td><span class="badge b-blue"><i></i>Issued</span></td>
-        <td class="num muted">29 Aug, 22:10</td>
-      </tr>
-      <tr data-go="order" data-id="2114">
-        <td><span class="t-name">#2114</span></td>
-        <td><span class="t-name">Noa Barak</span><div class="t-sub">noa@example.com</div></td>
-        <td><span class="cell-t"><span class="thumb" style="width:26px;height:26px"><svg viewBox="0 0 100 100"><use href="#a-island"/></svg></span><span class="t-name">Island Day Trip — Koh Larn</span></span></td>
-        <td class="num">1</td>
-        <td class="num">2,544 THB</td>
-        <td><span class="badge b-neutral"><i></i>Refunded</span></td>
-        <td><span class="badge b-neutral"><i></i>Void</span></td>
-        <td class="num muted">29 Aug, 18:33</td>
-      </tr>
-      <tr data-go="order" data-id="2113">
-        <td><span class="t-name">#2113</span></td>
-        <td><span class="t-name">Dan Levi</span><div class="t-sub">dan@example.com</div></td>
-        <td><span class="cell-t"><span class="thumb" style="width:26px;height:26px"><svg viewBox="0 0 100 100"><use href="#a-tee"/></svg></span><span class="t-name">Afterlight Tee — Eclipse</span></span></td>
-        <td class="num">3</td>
-        <td class="num">2,830 THB</td>
-        <td><span class="badge b-green"><i></i>Paid</span></td>
-        <td><span class="badge b-green"><i></i>Redeemed</span></td>
-        <td class="num muted">29 Aug, 09:05</td>
-      </tr>
-      <tr data-go="order" data-id="2112">
-        <td><span class="t-name">#2112</span></td>
-        <td><span class="t-name">Rin Suwan</span><div class="t-sub">rin@example.com</div></td>
-        <td><span class="cell-t"><span class="thumb" style="width:26px;height:26px"><svg viewBox="0 0 100 100"><use href="#a-boat"/></svg></span><span class="t-name">Sunset Boat Party</span></span></td>
-        <td class="num">2</td>
-        <td class="num">3,816 THB</td>
-        <td><span class="badge b-orange"><i></i>Pending</span></td>
-        <td><span class="badge b-neutral"><i></i>—</span></td>
-        <td class="num muted">28 Aug, 20:51</td>
-      </tr></tbody>
-  </table></div>
-</div>
-</div></div></section><section class="pg" data-pg="order" hidden>
+<div class="main"><div class="content" id="c-orders"></div></div></section><section class="pg" data-pg="order" hidden>
 <aside class="side">
   <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
   <nav class="nav">
@@ -585,77 +329,7 @@
   </nav>
   <div class="side-foot"><span>Bumpy Partner</span></div>
 </aside>
-<div class="main"><div class="content">
-<div class="crumb"><a data-go="orders">Orders</a><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>#2117</span></div>
-<div class="ph">
-  <div><h1>Order #2117</h1><p>30 Aug, 14:02 · <span class="badge b-green"><i></i>Paid</span></p></div>
-  <div style="display:flex;gap:8px">
-    <button class="btn">Resend voucher</button>
-    <button class="btn danger">Refund</button>
-  </div>
-</div>
-
-<div class="two">
-  <div>
-    <div class="card">
-      <div class="card-h"><h2>Items</h2></div>
-      <div class="tbl-wrap"><table class="tbl">
-        <tbody><tr style="cursor:default">
-          <td><span class="cell-t"><span class="thumb" style="width:32px;height:32px"><svg viewBox="0 0 100 100"><use href="#a-island"/></svg></span><span class="t-name">Island Day Trip — Koh Larn</span></span></td>
-          <td class="num muted">2 × 2,400 THB</td>
-          <td class="num">4,800 THB</td>
-        </tr></tbody>
-      </table></div></div>
-      <div class="card-b">
-        <div class="kv"><span class="k">Subtotal</span><span class="v">4,800 THB</span></div>
-        <!-- Fee stays carved out here for the same reason it does at checkout:
-             the seller should see what Bumpy took, not a rolled-up number. -->
-        <div class="kv"><span class="k">Service fee</span><span class="v">288 THB</span></div>
-        <div class="kv"><span class="k" style="color:var(--fg-base);font-weight:600">Total</span>
-          <span class="v" style="font-size:15px">5,088 THB</span></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-h"><h2>Payment</h2></div>
-      <div class="card-b">
-        <div class="kv"><span class="k">Status</span><span class="v"><span class="badge b-green"><i></i>Paid</span></span></div>
-        <div class="kv"><span class="k">Method</span><span class="v">Visa •••• 4242</span></div>
-        <div class="kv"><span class="k">Stripe reference</span>
-          <span class="v" style="font-family:'Roboto Mono',monospace;font-size:12px">pi_3QxR8kL2eZv</span></div>
-        <div class="kv"><span class="k">Captured</span><span class="v">30 Aug, 14:02</span></div>
-      </div>
-    </div>
-  </div>
-
-  <div>
-    <div class="card">
-      <div class="card-h"><h2>Buyer</h2></div>
-      <div class="card-b">
-        <div class="kv"><span class="k">Name</span><span class="v">Eldar Tsabari</span></div>
-        <div class="kv"><span class="k">Email</span><span class="v">eldar@example.com</span></div>
-        <div class="kv"><span class="k">Phone</span><span class="v">+66 80 123 4567</span></div>
-        <div class="kv"><span class="k">Date of birth</span><span class="v">17 Apr 1992</span></div>
-        <div class="kv"><span class="k">Gender</span><span class="v">Male</span></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-h"><h2>Voucher</h2></div>
-      <div class="card-b">
-        <div class="kv"><span class="k">Number</span>
-          <span class="v" style="font-family:'Roboto Mono',monospace;font-size:12px">VCH-8K2M-4QP7</span></div>
-        <div class="kv"><span class="k">Admits</span><span class="v">2 people</span></div>
-        <div class="kv"><span class="k">Status</span><span class="v"><span class="badge b-blue"><i></i>Issued</span></span></div>
-      </div>
-      <div class="share">
-        <span class="qr"><svg viewBox="0 0 25 25" shape-rendering="crispEdges" fill="#000" role="img" aria-label="Shareable link QR code"><rect x="8" y="0" width="1" height="1"/><rect x="9" y="0" width="1" height="1"/><rect x="15" y="0" width="1" height="1"/><rect x="16" y="0" width="1" height="1"/><rect x="8" y="1" width="1" height="1"/><rect x="9" y="1" width="1" height="1"/><rect x="10" y="1" width="1" height="1"/><rect x="14" y="1" width="1" height="1"/><rect x="15" y="1" width="1" height="1"/><rect x="16" y="1" width="1" height="1"/><rect x="8" y="2" width="1" height="1"/><rect x="10" y="2" width="1" height="1"/><rect x="11" y="2" width="1" height="1"/><rect x="12" y="2" width="1" height="1"/><rect x="13" y="2" width="1" height="1"/><rect x="14" y="2" width="1" height="1"/><rect x="15" y="2" width="1" height="1"/><rect x="16" y="2" width="1" height="1"/><rect x="9" y="3" width="1" height="1"/><rect x="11" y="3" width="1" height="1"/><rect x="12" y="3" width="1" height="1"/><rect x="14" y="3" width="1" height="1"/><rect x="15" y="3" width="1" height="1"/><rect x="8" y="4" width="1" height="1"/><rect x="9" y="4" width="1" height="1"/><rect x="11" y="4" width="1" height="1"/><rect x="15" y="4" width="1" height="1"/><rect x="16" y="4" width="1" height="1"/><rect x="8" y="5" width="1" height="1"/><rect x="9" y="5" width="1" height="1"/><rect x="10" y="5" width="1" height="1"/><rect x="11" y="5" width="1" height="1"/><rect x="12" y="5" width="1" height="1"/><rect x="13" y="5" width="1" height="1"/><rect x="14" y="5" width="1" height="1"/><rect x="15" y="5" width="1" height="1"/><rect x="16" y="5" width="1" height="1"/><rect x="9" y="6" width="1" height="1"/><rect x="13" y="6" width="1" height="1"/><rect x="14" y="6" width="1" height="1"/><rect x="8" y="7" width="1" height="1"/><rect x="10" y="7" width="1" height="1"/><rect x="16" y="7" width="1" height="1"/><rect x="0" y="8" width="1" height="1"/><rect x="2" y="8" width="1" height="1"/><rect x="6" y="8" width="1" height="1"/><rect x="7" y="8" width="1" height="1"/><rect x="8" y="8" width="1" height="1"/><rect x="10" y="8" width="1" height="1"/><rect x="13" y="8" width="1" height="1"/><rect x="14" y="8" width="1" height="1"/><rect x="16" y="8" width="1" height="1"/><rect x="21" y="8" width="1" height="1"/><rect x="24" y="8" width="1" height="1"/><rect x="0" y="9" width="1" height="1"/><rect x="2" y="9" width="1" height="1"/><rect x="5" y="9" width="1" height="1"/><rect x="6" y="9" width="1" height="1"/><rect x="7" y="9" width="1" height="1"/><rect x="9" y="9" width="1" height="1"/><rect x="10" y="9" width="1" height="1"/><rect x="11" y="9" width="1" height="1"/><rect x="12" y="9" width="1" height="1"/><rect x="14" y="9" width="1" height="1"/><rect x="15" y="9" width="1" height="1"/><rect x="16" y="9" width="1" height="1"/><rect x="17" y="9" width="1" height="1"/><rect x="18" y="9" width="1" height="1"/><rect x="19" y="9" width="1" height="1"/><rect x="21" y="9" width="1" height="1"/><rect x="22" y="9" width="1" height="1"/><rect x="24" y="9" width="1" height="1"/><rect x="1" y="10" width="1" height="1"/><rect x="4" y="10" width="1" height="1"/><rect x="5" y="10" width="1" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="11" y="10" width="1" height="1"/><rect x="12" y="10" width="1" height="1"/><rect x="13" y="10" width="1" height="1"/><rect x="15" y="10" width="1" height="1"/><rect x="16" y="10" width="1" height="1"/><rect x="17" y="10" width="1" height="1"/><rect x="19" y="10" width="1" height="1"/><rect x="21" y="10" width="1" height="1"/><rect x="23" y="10" width="1" height="1"/><rect x="24" y="10" width="1" height="1"/><rect x="2" y="11" width="1" height="1"/><rect x="3" y="11" width="1" height="1"/><rect x="7" y="11" width="1" height="1"/><rect x="8" y="11" width="1" height="1"/><rect x="9" y="11" width="1" height="1"/><rect x="11" y="11" width="1" height="1"/><rect x="14" y="11" width="1" height="1"/><rect x="17" y="11" width="1" height="1"/><rect x="18" y="11" width="1" height="1"/><rect x="22" y="11" width="1" height="1"/><rect x="23" y="11" width="1" height="1"/><rect x="0" y="12" width="1" height="1"/><rect x="1" y="12" width="1" height="1"/><rect x="2" y="12" width="1" height="1"/><rect x="3" y="12" width="1" height="1"/><rect x="6" y="12" width="1" height="1"/><rect x="7" y="12" width="1" height="1"/><rect x="9" y="12" width="1" height="1"/><rect x="10" y="12" width="1" height="1"/><rect x="13" y="12" width="1" height="1"/><rect x="14" y="12" width="1" height="1"/><rect x="15" y="12" width="1" height="1"/><rect x="16" y="12" width="1" height="1"/><rect x="21" y="12" width="1" height="1"/><rect x="23" y="12" width="1" height="1"/><rect x="24" y="12" width="1" height="1"/><rect x="1" y="13" width="1" height="1"/><rect x="2" y="13" width="1" height="1"/><rect x="3" y="13" width="1" height="1"/><rect x="5" y="13" width="1" height="1"/><rect x="10" y="13" width="1" height="1"/><rect x="12" y="13" width="1" height="1"/><rect x="14" y="13" width="1" height="1"/><rect x="17" y="13" width="1" height="1"/><rect x="18" y="13" width="1" height="1"/><rect x="20" y="13" width="1" height="1"/><rect x="21" y="13" width="1" height="1"/><rect x="23" y="13" width="1" height="1"/><rect x="24" y="13" width="1" height="1"/><rect x="0" y="14" width="1" height="1"/><rect x="1" y="14" width="1" height="1"/><rect x="2" y="14" width="1" height="1"/><rect x="3" y="14" width="1" height="1"/><rect x="4" y="14" width="1" height="1"/><rect x="5" y="14" width="1" height="1"/><rect x="6" y="14" width="1" height="1"/><rect x="10" y="14" width="1" height="1"/><rect x="13" y="14" width="1" height="1"/><rect x="14" y="14" width="1" height="1"/><rect x="16" y="14" width="1" height="1"/><rect x="18" y="14" width="1" height="1"/><rect x="20" y="14" width="1" height="1"/><rect x="21" y="14" width="1" height="1"/><rect x="22" y="14" width="1" height="1"/><rect x="23" y="14" width="1" height="1"/><rect x="0" y="15" width="1" height="1"/><rect x="1" y="15" width="1" height="1"/><rect x="3" y="15" width="1" height="1"/><rect x="4" y="15" width="1" height="1"/><rect x="10" y="15" width="1" height="1"/><rect x="12" y="15" width="1" height="1"/><rect x="21" y="15" width="1" height="1"/><rect x="22" y="15" width="1" height="1"/><rect x="23" y="15" width="1" height="1"/><rect x="24" y="15" width="1" height="1"/><rect x="0" y="16" width="1" height="1"/><rect x="4" y="16" width="1" height="1"/><rect x="5" y="16" width="1" height="1"/><rect x="7" y="16" width="1" height="1"/><rect x="8" y="16" width="1" height="1"/><rect x="9" y="16" width="1" height="1"/><rect x="11" y="16" width="1" height="1"/><rect x="16" y="16" width="1" height="1"/><rect x="23" y="16" width="1" height="1"/><rect x="24" y="16" width="1" height="1"/><rect x="8" y="17" width="1" height="1"/><rect x="10" y="17" width="1" height="1"/><rect x="11" y="17" width="1" height="1"/><rect x="12" y="17" width="1" height="1"/><rect x="13" y="17" width="1" height="1"/><rect x="16" y="17" width="1" height="1"/><rect x="17" y="17" width="1" height="1"/><rect x="20" y="17" width="1" height="1"/><rect x="23" y="17" width="1" height="1"/><rect x="8" y="18" width="1" height="1"/><rect x="9" y="18" width="1" height="1"/><rect x="11" y="18" width="1" height="1"/><rect x="14" y="18" width="1" height="1"/><rect x="15" y="18" width="1" height="1"/><rect x="19" y="18" width="1" height="1"/><rect x="21" y="18" width="1" height="1"/><rect x="23" y="18" width="1" height="1"/><rect x="9" y="19" width="1" height="1"/><rect x="11" y="19" width="1" height="1"/><rect x="13" y="19" width="1" height="1"/><rect x="15" y="19" width="1" height="1"/><rect x="17" y="19" width="1" height="1"/><rect x="18" y="19" width="1" height="1"/><rect x="19" y="19" width="1" height="1"/><rect x="20" y="19" width="1" height="1"/><rect x="23" y="19" width="1" height="1"/><rect x="24" y="19" width="1" height="1"/><rect x="9" y="20" width="1" height="1"/><rect x="12" y="20" width="1" height="1"/><rect x="14" y="20" width="1" height="1"/><rect x="16" y="20" width="1" height="1"/><rect x="19" y="20" width="1" height="1"/><rect x="22" y="20" width="1" height="1"/><rect x="9" y="21" width="1" height="1"/><rect x="12" y="21" width="1" height="1"/><rect x="14" y="21" width="1" height="1"/><rect x="16" y="21" width="1" height="1"/><rect x="17" y="21" width="1" height="1"/><rect x="21" y="21" width="1" height="1"/><rect x="23" y="21" width="1" height="1"/><rect x="24" y="21" width="1" height="1"/><rect x="9" y="22" width="1" height="1"/><rect x="10" y="22" width="1" height="1"/><rect x="11" y="22" width="1" height="1"/><rect x="12" y="22" width="1" height="1"/><rect x="14" y="22" width="1" height="1"/><rect x="15" y="22" width="1" height="1"/><rect x="18" y="22" width="1" height="1"/><rect x="19" y="22" width="1" height="1"/><rect x="20" y="22" width="1" height="1"/><rect x="21" y="22" width="1" height="1"/><rect x="23" y="22" width="1" height="1"/><rect x="24" y="22" width="1" height="1"/><rect x="8" y="23" width="1" height="1"/><rect x="11" y="23" width="1" height="1"/><rect x="15" y="23" width="1" height="1"/><rect x="17" y="23" width="1" height="1"/><rect x="19" y="23" width="1" height="1"/><rect x="20" y="23" width="1" height="1"/><rect x="21" y="23" width="1" height="1"/><rect x="9" y="24" width="1" height="1"/><rect x="10" y="24" width="1" height="1"/><rect x="14" y="24" width="1" height="1"/><rect x="15" y="24" width="1" height="1"/><rect x="17" y="24" width="1" height="1"/><rect x="22" y="24" width="1" height="1"/><rect x="23" y="24" width="1" height="1"/><rect x="24" y="24" width="1" height="1"/><rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="#fff"/><rect x="2" y="2" width="3" height="3"/><rect x="18" y="0" width="7" height="7"/><rect x="19" y="1" width="5" height="5" fill="#fff"/><rect x="20" y="2" width="3" height="3"/><rect x="0" y="18" width="7" height="7"/><rect x="1" y="19" width="5" height="5" fill="#fff"/><rect x="2" y="20" width="3" height="3"/></svg></span>
-        <code>Scanned at the door with Bumpy Access</code>
-      </div>
-    </div>
-  </div>
-</div>
-</div></div></section><section class="pg" data-pg="events" hidden>
+<div class="main"><div class="content" id="c-order"></div></div></section><section class="pg" data-pg="events" hidden>
 <aside class="side">
   <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
   <nav class="nav">
@@ -670,12 +344,7 @@
   </nav>
   <div class="side-foot"><span>Bumpy Partner</span></div>
 </aside>
-<div class="main"><div class="content">
-<div class="ph"><div><h1>Events</h1><p>Not part of this prototype.</p></div></div>
-<div class="card"><div class="empty"><h3>Outside the Store prototype</h3>
-<p>This is the existing Events section of the partner dashboard.</p>
-<button class="btn" data-go="products">Back to Products</button></div></div>
-</div></div></section><section class="pg" data-pg="analytics" hidden>
+<div class="main"><div class="content" id="c-events"></div></div></section><section class="pg" data-pg="analytics" hidden>
 <aside class="side">
   <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
   <nav class="nav">
@@ -690,12 +359,7 @@
   </nav>
   <div class="side-foot"><span>Bumpy Partner</span></div>
 </aside>
-<div class="main"><div class="content">
-<div class="ph"><div><h1>Analytics</h1><p>Not part of this prototype.</p></div></div>
-<div class="card"><div class="empty"><h3>Outside the Store prototype</h3>
-<p>This is the existing Analytics section of the partner dashboard.</p>
-<button class="btn" data-go="products">Back to Products</button></div></div>
-</div></div></section><section class="pg" data-pg="settings" hidden>
+<div class="main"><div class="content" id="c-analytics"></div></div></section><section class="pg" data-pg="settings" hidden>
 <aside class="side">
   <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
   <nav class="nav">
@@ -710,30 +374,460 @@
   </nav>
   <div class="side-foot"><span>Bumpy Partner</span></div>
 </aside>
-<div class="main"><div class="content">
-<div class="ph"><div><h1>Settings</h1><p>Not part of this prototype.</p></div></div>
-<div class="card"><div class="empty"><h3>Outside the Store prototype</h3>
-<p>This is the existing Settings section of the partner dashboard.</p>
-<button class="btn" data-go="products">Back to Products</button></div></div>
-</div></div></section>
+<div class="main"><div class="content" id="c-settings"></div></div></section>
+<div id="toast" role="status" aria-live="polite"></div>
 <script>
-  var KEYS = ['products', 'create', 'detail', 'edit', 'orders', 'order', 'events', 'analytics', 'settings'];
-  function show(key, push){
+  window.__ICONS = {
+    link: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>', plus: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>', chev: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    tick: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>', ext: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>', qr: '<svg viewBox="0 0 25 25" shape-rendering="crispEdges" fill="#000" role="img" aria-label="Shareable link QR code"><rect x="8" y="0" width="1" height="1"/><rect x="11" y="0" width="1" height="1"/><rect x="12" y="0" width="1" height="1"/><rect x="13" y="0" width="1" height="1"/><rect x="15" y="0" width="1" height="1"/><rect x="16" y="0" width="1" height="1"/><rect x="10" y="1" width="1" height="1"/><rect x="11" y="1" width="1" height="1"/><rect x="15" y="1" width="1" height="1"/><rect x="16" y="1" width="1" height="1"/><rect x="8" y="2" width="1" height="1"/><rect x="11" y="2" width="1" height="1"/><rect x="12" y="2" width="1" height="1"/><rect x="13" y="2" width="1" height="1"/><rect x="16" y="2" width="1" height="1"/><rect x="8" y="3" width="1" height="1"/><rect x="9" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="13" y="3" width="1" height="1"/><rect x="15" y="3" width="1" height="1"/><rect x="8" y="4" width="1" height="1"/><rect x="11" y="4" width="1" height="1"/><rect x="12" y="4" width="1" height="1"/><rect x="13" y="4" width="1" height="1"/><rect x="15" y="4" width="1" height="1"/><rect x="8" y="5" width="1" height="1"/><rect x="9" y="5" width="1" height="1"/><rect x="12" y="5" width="1" height="1"/><rect x="13" y="5" width="1" height="1"/><rect x="15" y="5" width="1" height="1"/><rect x="8" y="6" width="1" height="1"/><rect x="9" y="6" width="1" height="1"/><rect x="11" y="6" width="1" height="1"/><rect x="12" y="6" width="1" height="1"/><rect x="15" y="6" width="1" height="1"/><rect x="16" y="6" width="1" height="1"/><rect x="8" y="7" width="1" height="1"/><rect x="10" y="7" width="1" height="1"/><rect x="11" y="7" width="1" height="1"/><rect x="1" y="8" width="1" height="1"/><rect x="4" y="8" width="1" height="1"/><rect x="5" y="8" width="1" height="1"/><rect x="6" y="8" width="1" height="1"/><rect x="7" y="8" width="1" height="1"/><rect x="9" y="8" width="1" height="1"/><rect x="11" y="8" width="1" height="1"/><rect x="12" y="8" width="1" height="1"/><rect x="14" y="8" width="1" height="1"/><rect x="15" y="8" width="1" height="1"/><rect x="16" y="8" width="1" height="1"/><rect x="19" y="8" width="1" height="1"/><rect x="21" y="8" width="1" height="1"/><rect x="23" y="8" width="1" height="1"/><rect x="3" y="9" width="1" height="1"/><rect x="9" y="9" width="1" height="1"/><rect x="11" y="9" width="1" height="1"/><rect x="14" y="9" width="1" height="1"/><rect x="15" y="9" width="1" height="1"/><rect x="17" y="9" width="1" height="1"/><rect x="18" y="9" width="1" height="1"/><rect x="19" y="9" width="1" height="1"/><rect x="20" y="9" width="1" height="1"/><rect x="23" y="9" width="1" height="1"/><rect x="24" y="9" width="1" height="1"/><rect x="0" y="10" width="1" height="1"/><rect x="1" y="10" width="1" height="1"/><rect x="2" y="10" width="1" height="1"/><rect x="3" y="10" width="1" height="1"/><rect x="6" y="10" width="1" height="1"/><rect x="8" y="10" width="1" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="16" y="10" width="1" height="1"/><rect x="17" y="10" width="1" height="1"/><rect x="18" y="10" width="1" height="1"/><rect x="19" y="10" width="1" height="1"/><rect x="21" y="10" width="1" height="1"/><rect x="22" y="10" width="1" height="1"/><rect x="24" y="10" width="1" height="1"/><rect x="2" y="11" width="1" height="1"/><rect x="4" y="11" width="1" height="1"/><rect x="6" y="11" width="1" height="1"/><rect x="12" y="11" width="1" height="1"/><rect x="13" y="11" width="1" height="1"/><rect x="14" y="11" width="1" height="1"/><rect x="15" y="11" width="1" height="1"/><rect x="16" y="11" width="1" height="1"/><rect x="17" y="11" width="1" height="1"/><rect x="18" y="11" width="1" height="1"/><rect x="19" y="11" width="1" height="1"/><rect x="20" y="11" width="1" height="1"/><rect x="21" y="11" width="1" height="1"/><rect x="23" y="11" width="1" height="1"/><rect x="24" y="11" width="1" height="1"/><rect x="1" y="12" width="1" height="1"/><rect x="2" y="12" width="1" height="1"/><rect x="3" y="12" width="1" height="1"/><rect x="4" y="12" width="1" height="1"/><rect x="6" y="12" width="1" height="1"/><rect x="9" y="12" width="1" height="1"/><rect x="14" y="12" width="1" height="1"/><rect x="16" y="12" width="1" height="1"/><rect x="17" y="12" width="1" height="1"/><rect x="18" y="12" width="1" height="1"/><rect x="19" y="12" width="1" height="1"/><rect x="21" y="12" width="1" height="1"/><rect x="22" y="12" width="1" height="1"/><rect x="1" y="13" width="1" height="1"/><rect x="2" y="13" width="1" height="1"/><rect x="3" y="13" width="1" height="1"/><rect x="5" y="13" width="1" height="1"/><rect x="6" y="13" width="1" height="1"/><rect x="7" y="13" width="1" height="1"/><rect x="9" y="13" width="1" height="1"/><rect x="11" y="13" width="1" height="1"/><rect x="12" y="13" width="1" height="1"/><rect x="16" y="13" width="1" height="1"/><rect x="22" y="13" width="1" height="1"/><rect x="23" y="13" width="1" height="1"/><rect x="24" y="13" width="1" height="1"/><rect x="1" y="14" width="1" height="1"/><rect x="2" y="14" width="1" height="1"/><rect x="3" y="14" width="1" height="1"/><rect x="4" y="14" width="1" height="1"/><rect x="6" y="14" width="1" height="1"/><rect x="7" y="14" width="1" height="1"/><rect x="8" y="14" width="1" height="1"/><rect x="9" y="14" width="1" height="1"/><rect x="11" y="14" width="1" height="1"/><rect x="14" y="14" width="1" height="1"/><rect x="15" y="14" width="1" height="1"/><rect x="16" y="14" width="1" height="1"/><rect x="17" y="14" width="1" height="1"/><rect x="18" y="14" width="1" height="1"/><rect x="19" y="14" width="1" height="1"/><rect x="20" y="14" width="1" height="1"/><rect x="21" y="14" width="1" height="1"/><rect x="22" y="14" width="1" height="1"/><rect x="23" y="14" width="1" height="1"/><rect x="1" y="15" width="1" height="1"/><rect x="2" y="15" width="1" height="1"/><rect x="3" y="15" width="1" height="1"/><rect x="5" y="15" width="1" height="1"/><rect x="6" y="15" width="1" height="1"/><rect x="9" y="15" width="1" height="1"/><rect x="10" y="15" width="1" height="1"/><rect x="12" y="15" width="1" height="1"/><rect x="15" y="15" width="1" height="1"/><rect x="16" y="15" width="1" height="1"/><rect x="17" y="15" width="1" height="1"/><rect x="18" y="15" width="1" height="1"/><rect x="20" y="15" width="1" height="1"/><rect x="23" y="15" width="1" height="1"/><rect x="1" y="16" width="1" height="1"/><rect x="3" y="16" width="1" height="1"/><rect x="6" y="16" width="1" height="1"/><rect x="7" y="16" width="1" height="1"/><rect x="11" y="16" width="1" height="1"/><rect x="12" y="16" width="1" height="1"/><rect x="13" y="16" width="1" height="1"/><rect x="16" y="16" width="1" height="1"/><rect x="17" y="16" width="1" height="1"/><rect x="20" y="16" width="1" height="1"/><rect x="21" y="16" width="1" height="1"/><rect x="22" y="16" width="1" height="1"/><rect x="23" y="16" width="1" height="1"/><rect x="24" y="16" width="1" height="1"/><rect x="8" y="17" width="1" height="1"/><rect x="10" y="17" width="1" height="1"/><rect x="13" y="17" width="1" height="1"/><rect x="15" y="17" width="1" height="1"/><rect x="18" y="17" width="1" height="1"/><rect x="24" y="17" width="1" height="1"/><rect x="8" y="18" width="1" height="1"/><rect x="10" y="18" width="1" height="1"/><rect x="11" y="18" width="1" height="1"/><rect x="19" y="18" width="1" height="1"/><rect x="23" y="18" width="1" height="1"/><rect x="24" y="18" width="1" height="1"/><rect x="8" y="19" width="1" height="1"/><rect x="9" y="19" width="1" height="1"/><rect x="10" y="19" width="1" height="1"/><rect x="15" y="19" width="1" height="1"/><rect x="16" y="19" width="1" height="1"/><rect x="21" y="19" width="1" height="1"/><rect x="24" y="19" width="1" height="1"/><rect x="8" y="20" width="1" height="1"/><rect x="9" y="20" width="1" height="1"/><rect x="10" y="20" width="1" height="1"/><rect x="11" y="20" width="1" height="1"/><rect x="12" y="20" width="1" height="1"/><rect x="14" y="20" width="1" height="1"/><rect x="18" y="20" width="1" height="1"/><rect x="21" y="20" width="1" height="1"/><rect x="24" y="20" width="1" height="1"/><rect x="8" y="21" width="1" height="1"/><rect x="9" y="21" width="1" height="1"/><rect x="10" y="21" width="1" height="1"/><rect x="16" y="21" width="1" height="1"/><rect x="8" y="22" width="1" height="1"/><rect x="9" y="22" width="1" height="1"/><rect x="10" y="22" width="1" height="1"/><rect x="11" y="22" width="1" height="1"/><rect x="12" y="22" width="1" height="1"/><rect x="13" y="22" width="1" height="1"/><rect x="14" y="22" width="1" height="1"/><rect x="15" y="22" width="1" height="1"/><rect x="16" y="22" width="1" height="1"/><rect x="19" y="22" width="1" height="1"/><rect x="21" y="22" width="1" height="1"/><rect x="23" y="22" width="1" height="1"/><rect x="24" y="22" width="1" height="1"/><rect x="9" y="23" width="1" height="1"/><rect x="10" y="23" width="1" height="1"/><rect x="12" y="23" width="1" height="1"/><rect x="19" y="23" width="1" height="1"/><rect x="20" y="23" width="1" height="1"/><rect x="21" y="23" width="1" height="1"/><rect x="24" y="23" width="1" height="1"/><rect x="8" y="24" width="1" height="1"/><rect x="9" y="24" width="1" height="1"/><rect x="10" y="24" width="1" height="1"/><rect x="12" y="24" width="1" height="1"/><rect x="13" y="24" width="1" height="1"/><rect x="14" y="24" width="1" height="1"/><rect x="15" y="24" width="1" height="1"/><rect x="16" y="24" width="1" height="1"/><rect x="17" y="24" width="1" height="1"/><rect x="21" y="24" width="1" height="1"/><rect x="23" y="24" width="1" height="1"/><rect x="24" y="24" width="1" height="1"/><rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="#fff"/><rect x="2" y="2" width="3" height="3"/><rect x="18" y="0" width="7" height="7"/><rect x="19" y="1" width="5" height="5" fill="#fff"/><rect x="20" y="2" width="3" height="3"/><rect x="0" y="18" width="7" height="7"/><rect x="1" y="19" width="5" height="5" fill="#fff"/><rect x="2" y="20" width="3" height="3"/></svg>'
+  };
+</script>
+
+<script>
+(function(){
+  // ---------------------------------------------------------------- data
+  var PRODUCTS = [
+    {id:"sti_01", t:"Island Day Trip — Koh Larn", art:"a-island",
+     desc:"A full day off the mainland with the Afterlight crew. Speedboat out at first light, two beaches before the day-trip boats arrive, lunch on the sand, and back in time for the evening set.",
+     price:2400, qty:24, sold:21, status:"published", slug:"island-day-trip-koh-larn"},
+    {id:"sti_02", t:"Sunset Boat Party", art:"a-boat",
+     desc:"Three hours on the water with the resident DJs. Open deck, one drink included.",
+     price:1800, qty:60, sold:34, status:"published", slug:"sunset-boat-party"},
+    {id:"sti_03", t:"Afterlight Tee — Eclipse", art:"a-tee",
+     desc:"Heavyweight cotton, screen-printed eclipse mark. S–XXL.",
+     price:890, qty:120, sold:47, status:"published", slug:"afterlight-tee-eclipse"},
+    {id:"sti_04", t:"Airport Transfer BKK ⇄ Sukhumvit", art:"a-transfer",
+     desc:"Private car, up to three bags. Booked at least 12 hours ahead.",
+     price:650, qty:40, sold:12, status:"draft", slug:"airport-transfer-bkk-sukhumvit"}
+  ];
+  var ORDERS = [
+    {no:"2117", buyer:"Eldar Tsabari", email:"eldar@example.com", pid:"sti_01", qty:2, amount:5088, pay:"paid", vch:"issued", when:"30 Aug, 14:02"},
+    {no:"2116", buyer:"Maya Cohen", email:"maya@example.com", pid:"sti_03", qty:1, amount:943, pay:"paid", vch:"redeemed", when:"30 Aug, 11:47"},
+    {no:"2115", buyer:"Tom Alperin", email:"tom@example.com", pid:"sti_02", qty:4, amount:7632, pay:"paid", vch:"issued", when:"29 Aug, 22:10"},
+    {no:"2114", buyer:"Noa Barak", email:"noa@example.com", pid:"sti_01", qty:1, amount:2544, pay:"refunded", vch:"void", when:"29 Aug, 18:33"},
+    {no:"2113", buyer:"Dan Levi", email:"dan@example.com", pid:"sti_03", qty:3, amount:2830, pay:"paid", vch:"redeemed", when:"29 Aug, 09:05"},
+    {no:"2112", buyer:"Rin Suwan", email:"rin@example.com", pid:"sti_02", qty:2, amount:3816, pay:"pending", vch:"—", when:"28 Aug, 20:51"}
+  ];
+
+  var STATUS = {published:["green","Published"], draft:["neutral","Draft"],
+                unpublished:["orange","Unpublished"], archived:["neutral","Archived"]};
+  var PAY = {paid:["green","Paid"], pending:["orange","Pending"], refunded:["neutral","Refunded"]};
+  var VCH = {issued:["blue","Issued"], redeemed:["green","Redeemed"], void:["neutral","Void"], "—":["neutral","—"]};
+
+  var sel = {product:"sti_01", order:"2117"};
+  var draft = null;   // the product being created / edited
+
+  // ---------------------------------------------------------------- helpers
+  function esc(v){ return String(v==null?"":v).replace(/[&<>"]/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function thb(n){ return Number(n||0).toLocaleString("en-US") + " THB"; }
+  function byId(id){ return PRODUCTS.filter(function(p){ return p.id===id; })[0]; }
+  function badge(map, key){
+    var b = map[key] || ["neutral", key];
+    return '<span class="badge b-'+b[0]+'"><i></i>'+b[1]+'</span>';
+  }
+  function art(name, size){
+    if (!name) return '<span class="thumb" style="width:'+size+'px;height:'+size+'px"></span>';
+    return '<span class="thumb" style="width:'+size+'px;height:'+size+'px">'+
+      '<svg viewBox="0 0 100 100"><use href="#'+name+'"/></svg></span>';
+  }
+  function slugify(t){
+    return String(t||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48);
+  }
+  function toast(msg){
+    var el = document.getElementById("toast");
+    el.textContent = msg; el.classList.add("on");
+    clearTimeout(el._t); el._t = setTimeout(function(){ el.classList.remove("on"); }, 2200);
+  }
+  var ICONS = window.__ICONS;
+  // the storefront prototype, so "View public page" crosses to the buyer side
+  var STOREFRONT = "https://eldartsa.github.io/bumpy-storefront-preview/#product";
+
+  // ---------------------------------------------------------------- renders
+  function renderProducts(){
+    var rows = PRODUCTS.map(function(p){
+      var left = p.qty - p.sold;
+      return '<tr data-go="detail" data-id="'+p.id+'">'+
+        '<td><span class="cell-t">'+art(p.art,32)+'<span class="t-name">'+esc(p.t)+'</span></span></td>'+
+        '<td class="num">'+thb(p.price)+'</td>'+
+        '<td class="num">'+p.sold+'</td>'+
+        '<td class="num">'+(p.status==="draft" ? '<span class="muted">—</span>' : left)+'</td>'+
+        '<td>'+badge(STATUS,p.status)+'</td>'+
+        '<td class="num"><button class="btn sm" data-copy="'+esc(p.slug)+'" data-stop>'+ICONS.link+'Copy link</button></td>'+
+      '</tr>';
+    }).join("");
+
+    document.getElementById("c-products").innerHTML =
+      '<div class="ph"><div><h1>Products</h1>'+
+      "<p>Things you sell that aren't events — trips, add-ons, merch.</p></div>"+
+      '<button class="btn primary" data-go="create">'+ICONS.plus+'New product</button></div>'+
+      '<div class="card"><div class="bar">'+
+        '<input class="search" placeholder="Search products">'+
+        '<select class="filter"><option>All statuses</option><option>Published</option><option>Draft</option></select>'+
+      '</div>'+
+      (PRODUCTS.length
+        ? '<div class="tbl-wrap"><table class="tbl wide"><thead><tr>'+
+          '<th>Product</th><th class="num">Price</th><th class="num">Sold</th>'+
+          '<th class="num">Remaining</th><th>Status</th><th></th>'+
+          '</tr></thead><tbody>'+rows+'</tbody></table></div>'
+        : '<div class="empty"><h3>No products yet</h3>'+
+          '<p>Sell a trip, an add-on, or merch alongside your events.</p>'+
+          '<button class="btn primary" data-go="create">'+ICONS.plus+'New product</button></div>')+
+      '</div>';
+  }
+
+  function orderRow(o, compact){
+    var p = byId(o.pid) || {t:"—", art:null};
+    if (compact) {
+      return '<tr data-go="order" data-id="'+o.no+'">'+
+        '<td><span class="t-name">#'+o.no+'</span></td>'+
+        '<td><span class="t-name">'+esc(o.buyer)+'</span><div class="t-sub">'+esc(o.email)+'</div></td>'+
+        '<td class="num">'+thb(o.amount)+'</td>'+
+        '<td>'+badge(PAY,o.pay)+'</td>'+
+        '<td class="num muted">'+o.when+'</td></tr>';
+    }
+    return '<tr data-go="order" data-id="'+o.no+'">'+
+      '<td><span class="t-name">#'+o.no+'</span></td>'+
+      '<td><span class="t-name">'+esc(o.buyer)+'</span><div class="t-sub">'+esc(o.email)+'</div></td>'+
+      '<td><span class="cell-t">'+art(p.art,26)+'<span class="t-name">'+esc(p.t)+'</span></span></td>'+
+      '<td class="num">'+o.qty+'</td><td class="num">'+thb(o.amount)+'</td>'+
+      '<td>'+badge(PAY,o.pay)+'</td><td>'+badge(VCH,o.vch)+'</td>'+
+      '<td class="num muted">'+o.when+'</td></tr>';
+  }
+
+  function renderDetail(){
+    var p = byId(sel.product) || PRODUCTS[0];
+    if (!p) { go("products"); return; }
+    var mine = ORDERS.filter(function(o){ return o.pid === p.id; });
+    var revenue = mine.reduce(function(s,o){ return s + (o.pay==="paid" ? o.amount : 0); }, 0);
+    document.getElementById("c-detail").innerHTML =
+      '<div class="crumb"><a data-go="products">Products</a>'+ICONS.chev+'<span>'+esc(p.t)+'</span></div>'+
+      '<div class="ph"><div><h1>'+esc(p.t)+'</h1><p>'+badge(STATUS,p.status)+'</p></div>'+
+        '<div style="display:flex;gap:8px">'+
+          '<button class="btn" data-go="edit" data-id="'+p.id+'">Edit</button>'+
+          '<button class="btn" data-toggle="'+p.id+'">'+(p.status==="published"?"Unpublish":"Publish")+'</button>'+
+        '</div></div>'+
+      '<div class="card"><div class="stats">'+
+        '<div class="stat"><div class="k">Sold</div><div class="v">'+p.sold+'</div></div>'+
+        '<div class="stat"><div class="k">Revenue</div><div class="v">'+thb(revenue)+'</div></div>'+
+        '<div class="stat"><div class="k">Remaining</div><div class="v">'+(p.qty-p.sold)+'</div></div>'+
+      '</div></div>'+
+      '<div class="two" style="margin-top:16px">'+
+        '<div class="card"><div class="card-h"><h2>Orders for this product</h2>'+
+          '<button class="btn sm" data-go="orders">View all</button></div>'+
+          (mine.length
+            ? '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Order</th><th>Buyer</th>'+
+              '<th class="num">Amount</th><th>Payment</th><th class="num">Date</th></tr></thead><tbody>'+
+              mine.map(function(o){ return orderRow(o,true); }).join("")+'</tbody></table></div>'
+            : '<div class="empty"><h3>No orders yet</h3><p>Share the link below to start selling.</p></div>')+
+        '</div>'+
+        '<div><div class="card">'+
+          '<div class="card-h"><h2>Details</h2></div>'+
+          (p.art ? '<div style="border-bottom:1px solid var(--border-base);height:150px;overflow:hidden">'+
+            '<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" style="display:block;width:100%;height:100%">'+
+            '<use href="#'+p.art+'"/></svg></div>' : '')+
+          '<div class="card-b">'+
+            '<p style="margin:0 0 12px;color:var(--fg-subtle);font-size:13px">'+esc(p.desc)+'</p>'+
+            '<div class="kv"><span class="k">Price</span><span class="v">'+thb(p.price)+'</span></div>'+
+            '<div class="kv"><span class="k">Quantity</span><span class="v">'+p.qty+'</span></div>'+
+            '<div class="kv"><span class="k">Status</span><span class="v">'+badge(STATUS,p.status)+'</span></div>'+
+          '</div>'+
+          shareBlock(p)+
+        '</div></div>'+
+      '</div>';
+  }
+
+  // A store item has no browse surface — it is reached by link, exactly as an
+  // event is. So the link is the product's distribution, not a footnote.
+  function shareBlock(p){
+    return '<div class="share"><span class="qr">'+ICONS.qr+'</span>'+
+      '<code>bumpy.fm/s/'+esc(p.slug)+'</code>'+
+      '<button class="btn sm" data-copy="'+esc(p.slug)+'">'+ICONS.link+'Copy</button></div>';
+  }
+
+  function renderOrders(){
+    document.getElementById("c-orders").innerHTML =
+      '<div class="ph"><div><h1>Orders</h1>'+
+      '<p>Everything sold from your store, across every product.</p></div>'+
+      '<button class="btn">Export</button></div>'+
+      '<div class="card"><div class="bar">'+
+        '<input class="search" placeholder="Search by buyer, email or order number">'+
+        '<select class="filter"><option>All products</option>'+
+        PRODUCTS.map(function(p){ return '<option>'+esc(p.t)+'</option>'; }).join("")+'</select>'+
+        '<select class="filter"><option>All statuses</option><option>Paid</option><option>Pending</option><option>Refunded</option></select>'+
+      '</div><div class="tbl-wrap"><table class="tbl wide"><thead><tr>'+
+        '<th>Order</th><th>Buyer</th><th>Product</th><th class="num">Qty</th>'+
+        '<th class="num">Amount</th><th>Payment</th><th>Voucher</th><th class="num">Date</th>'+
+      '</tr></thead><tbody>'+ORDERS.map(function(o){ return orderRow(o,false); }).join("")+
+      '</tbody></table></div></div>';
+  }
+
+  function renderOrder(){
+    var o = ORDERS.filter(function(x){ return x.no === sel.order; })[0] || ORDERS[0];
+    var p = byId(o.pid) || {t:"—", art:null, price:0};
+    var sub = p.price * o.qty, fee = o.amount - sub;
+    document.getElementById("c-order").innerHTML =
+      '<div class="crumb"><a data-go="orders">Orders</a>'+ICONS.chev+'<span>#'+o.no+'</span></div>'+
+      '<div class="ph"><div><h1>Order #'+o.no+'</h1><p>'+o.when+' · '+badge(PAY,o.pay)+'</p></div>'+
+        '<div style="display:flex;gap:8px"><button class="btn">Resend voucher</button>'+
+        '<button class="btn danger">Refund</button></div></div>'+
+      '<div class="two"><div>'+
+        '<div class="card"><div class="card-h"><h2>Items</h2></div>'+
+          '<div class="tbl-wrap"><table class="tbl"><tbody><tr style="cursor:default">'+
+            '<td><span class="cell-t">'+art(p.art,32)+'<span class="t-name">'+esc(p.t)+'</span></span></td>'+
+            '<td class="num muted">'+o.qty+' × '+thb(p.price)+'</td>'+
+            '<td class="num">'+thb(sub)+'</td></tr></tbody></table></div>'+
+          '<div class="card-b">'+
+            '<div class="kv"><span class="k">Subtotal</span><span class="v">'+thb(sub)+'</span></div>'+
+            '<div class="kv"><span class="k">Service fee</span><span class="v">'+thb(fee)+'</span></div>'+
+            '<div class="kv"><span class="k" style="color:var(--fg-base);font-weight:600">Total</span>'+
+            '<span class="v" style="font-size:15px">'+thb(o.amount)+'</span></div>'+
+          '</div></div>'+
+        '<div class="card"><div class="card-h"><h2>Payment</h2></div><div class="card-b">'+
+          '<div class="kv"><span class="k">Status</span><span class="v">'+badge(PAY,o.pay)+'</span></div>'+
+          '<div class="kv"><span class="k">Method</span><span class="v">Visa •••• 4242</span></div>'+
+          '<div class="kv"><span class="k">Stripe reference</span><span class="v" style="font-family:\'Roboto Mono\',monospace;font-size:12px">pi_3QxR8kL2eZv</span></div>'+
+          '<div class="kv"><span class="k">Captured</span><span class="v">'+o.when+'</span></div>'+
+        '</div></div></div>'+
+        '<div><div class="card"><div class="card-h"><h2>Buyer</h2></div><div class="card-b">'+
+          '<div class="kv"><span class="k">Name</span><span class="v">'+esc(o.buyer)+'</span></div>'+
+          '<div class="kv"><span class="k">Email</span><span class="v">'+esc(o.email)+'</span></div>'+
+          '<div class="kv"><span class="k">Phone</span><span class="v">+66 80 123 4567</span></div>'+
+          '<div class="kv"><span class="k">Date of birth</span><span class="v">17 Apr 1992</span></div>'+
+          '<div class="kv"><span class="k">Gender</span><span class="v">Male</span></div>'+
+        '</div></div>'+
+        '<div class="card"><div class="card-h"><h2>Voucher</h2></div><div class="card-b">'+
+          '<div class="kv"><span class="k">Number</span><span class="v" style="font-family:\'Roboto Mono\',monospace;font-size:12px">VCH-8K2M-4QP7</span></div>'+
+          '<div class="kv"><span class="k">Admits</span><span class="v">'+o.qty+' people</span></div>'+
+          '<div class="kv"><span class="k">Status</span><span class="v">'+badge(VCH,o.vch)+'</span></div>'+
+        '</div><div class="share"><span class="qr">'+ICONS.qr+'</span>'+
+          '<code>Scanned at the door with Bumpy Access</code></div></div>'+
+      '</div></div>';
+  }
+
+  // ------------------------------------------------------------ the form
+  var FIELDS = [
+    {k:"t",     label:"Title",              type:"text",   ph:"e.g. Island Day Trip — Koh Larn, 4 Sep",
+     help:"There is no date field. If your item runs on a day, put the day in the title.",
+     err:"Give it a title — this is what buyers see first."},
+    {k:"desc",  label:"Description",        type:"area",   ph:"What the buyer gets.",
+     help:"This is the only body copy on the public page — say what's included and what isn't.",
+     err:"Describe what the buyer gets."},
+    {k:"price", label:"Price", hint:"THB",  type:"num",    ph:"0",
+     err:"Set a price above zero."},
+    {k:"qty",   label:"Quantity available", type:"num",    ph:"0",
+     help:"Quantity drives “Only N left” and sold-out on the public page.",
+     err:"Say how many you can sell."}
+  ];
+
+  // Create and edit are two separate, simultaneously-mounted subtrees, so every
+  // id here is scoped by mode. Sharing them meant getElementById reached into
+  // whichever page happened to be first in the DOM — the hidden one.
+  function fid(mode, k){ return mode + "-f-" + k; }
+  function eid(mode, k){ return mode + "-e-" + k; }
+
+  function renderForm(mode){
+    var editing = mode === "edit";
+    var d = draft;
+    var body = FIELDS.map(function(f){
+      var v = d[f.k] == null ? "" : d[f.k];
+      var id = fid(mode, f.k);
+      var input = f.type === "area"
+        ? '<textarea id="'+id+'" data-f="'+f.k+'" placeholder="'+esc(f.ph)+'">'+esc(v)+'</textarea>'
+        : '<input id="'+id+'" data-f="'+f.k+'"'+(f.type==="num"?' inputmode="numeric"':'')+
+          ' value="'+esc(v)+'" placeholder="'+esc(f.ph)+'">';
+      return '<div class="fld"><label for="'+id+'">'+f.label+
+        (f.hint?'<span class="hint">'+f.hint+'</span>':'')+'</label>'+input+
+        '<p class="err" id="'+eid(mode, f.k)+'">'+esc(f.err)+'</p></div>'+
+        (f.help?'<p class="help">'+f.help+'</p>':'');
+    }).join("");
+
+    document.getElementById("c-"+mode).innerHTML =
+      '<div class="crumb"><a data-go="products">Products</a>'+ICONS.chev+
+        '<span>'+(editing?"Edit":"New product")+'</span></div>'+
+      '<div class="ph"><div><h1>'+(editing?"Edit product":"New product")+'</h1>'+
+        "<p>Title, description and price. That's the whole thing.</p></div></div>"+
+      '<div class="two"><div class="card"><div class="card-b">'+body+
+        '<div class="fld"><label for="'+fid(mode,"status")+'">Status</label>'+
+        '<select id="'+fid(mode,"status")+'" data-f="status">'+
+          '<option value="draft"'+(d.status==="draft"?" selected":"")+'>Draft</option>'+
+          '<option value="published"'+(d.status==="published"?" selected":"")+'>Published</option>'+
+          (d.status==="unpublished"?'<option value="unpublished" selected>Unpublished</option>':'')+
+        '</select></div>'+
+        '<p class="help">A draft is only visible to you. Publishing makes the link live.</p>'+
+      '</div></div>'+
+      '<div><div class="card"><div class="card-h"><h2>Image</h2></div><div class="card-b">'+
+        '<div class="drop" id="'+mode+'-drop">Drop an image, or click to upload<br>'+
+        '<span style="font-size:12px">JPG or PNG, square works best</span></div>'+
+        '<p class="help" style="margin:10px 0 0">Click to drop in a sample image.</p>'+
+      '</div></div>'+
+      '<div class="card"><div class="card-h"><h2>Preview</h2>'+
+        '<span class="t-sub">On the producer page</span></div>'+
+      '<div class="card-b"><div class="prev-wrap"><div class="prev" id="'+mode+'-prev"></div></div>'+
+      '<p class="prev-note">This is the card a buyer sees.</p></div></div>'+
+      '<div class="card"><div class="card-b" style="display:flex;gap:8px;flex-wrap:wrap">'+
+        '<button class="btn primary" id="'+mode+'-save">'+(editing?"Save changes":"Create product")+'</button>'+
+        '<button class="btn" data-go="'+(editing?"detail":"products")+'">Cancel</button>'+
+      '</div></div></div></div>';
+
+    document.querySelectorAll('#c-'+mode+' [data-f]').forEach(function(el){
+      el.addEventListener("input", function(){
+        draft[el.dataset.f] = el.value;
+        el.classList.remove("bad");
+        var e = document.getElementById(eid(mode, el.dataset.f));
+        if (e) e.classList.remove("on");
+        paintPreview(mode);
+      });
+      el.addEventListener("change", function(){ draft[el.dataset.f] = el.value; paintPreview(mode); });
+    });
+    // Placeholder for a real upload; cycles the sample scenes so the preview
+    // and the resulting card have artwork to show.
+    var SCENES = ["a-island","a-boat","a-tee","a-transfer"];
+    document.getElementById(mode + "-drop").addEventListener("click", function(){
+      var i = SCENES.indexOf(draft.art);
+      draft.art = SCENES[(i + 1) % SCENES.length];
+      paintPreview(mode);
+    });
+    document.getElementById(mode + "-save").addEventListener("click", function(){ save(mode); });
+    paintPreview(mode);
+  }
+
+  function paintPreview(mode){
+    var el = document.getElementById(mode + "-prev");
+    if (!el) return;
+    var d = draft, left = (Number(d.qty)||0) - (Number(d.sold)||0);
+    el.innerHTML =
+      '<div class="art">'+(d.art
+        ? '<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><use href="#'+d.art+'"/></svg>'
+        : '<div class="ph-art">No image yet</div>')+'</div>'+
+      '<div class="bd">'+
+        '<h4>'+(esc(d.t) || '<span style="color:#52525b">Untitled</span>')+'</h4>'+
+        '<div class="d">'+(esc(d.desc) || '&nbsp;')+'</div>'+
+        (left > 0 && left <= 5 ? '<div class="left">Only '+left+' left</div>' : '')+
+        '<div class="p">'+(Number(d.price) ? Number(d.price).toLocaleString("en-US") : '—')+
+          ' <small>THB</small></div>'+
+      '</div>';
+  }
+
+  function save(mode){
+    var bad = null;
+    FIELDS.forEach(function(f){
+      var v = draft[f.k], empty = f.type === "num" ? !(Number(v) > 0) : !String(v||"").trim();
+      var input = document.getElementById(fid(mode, f.k)), e = document.getElementById(eid(mode, f.k));
+      if (empty) { input.classList.add("bad"); e.classList.add("on"); if (!bad) bad = input; }
+      else { input.classList.remove("bad"); e.classList.remove("on"); }
+    });
+    if (bad) { bad.focus(); bad.scrollIntoView({block:"center", behavior:"smooth"}); return; }
+
+    draft.price = Number(draft.price); draft.qty = Number(draft.qty);
+    draft.slug = draft.slug || slugify(draft.t);
+
+    if (mode === "edit") {
+      var i = PRODUCTS.findIndex(function(p){ return p.id === draft.id; });
+      PRODUCTS[i] = Object.assign({}, PRODUCTS[i], draft);
+      sel.product = draft.id;
+      toast("Changes saved");
+      go("detail");
+      return;
+    }
+    draft.id = "sti_" + String(PRODUCTS.length + 1).padStart(2, "0");
+    draft.sold = 0;
+    PRODUCTS.push(draft);
+    sel.product = draft.id;
+    go("created");
+  }
+
+  // The published moment. A seller who just made something needs the link more
+  // than they need a form — this is the whole point of publishing.
+  function renderCreated(){
+    var p = byId(sel.product) || PRODUCTS[PRODUCTS.length - 1];
+    var live = p.status === "published";
+    document.getElementById("c-created").innerHTML =
+      '<div class="card" style="max-width:560px;margin:40px auto 0">'+
+        '<div class="done"><div class="tick">'+ICONS.tick+'</div>'+
+          '<h2>'+(live ? "Product published" : "Saved as draft")+'</h2>'+
+          '<p>'+esc(p.t)+'</p>'+
+          '<div class="done-acts">'+
+            (live
+              ? '<a class="btn primary" href="'+STOREFRONT+'" target="_blank" rel="noopener">'+ICONS.ext+'View public page</a>'
+              : '<button class="btn primary" data-toggle="'+p.id+'" data-then="created">Publish now</button>')+
+            '<button class="btn" data-go="detail">Manage product</button>'+
+            '<button class="btn" data-go="products">All products</button>'+
+          '</div>'+
+        '</div>'+
+        (live
+          ? shareBlock(p)
+          : '<div class="share" style="background:var(--bg-subtle)"><code>'+
+            'The link goes live when you publish.</code></div>')+
+      '</div>';
+  }
+
+  // ---------------------------------------------------------------- router
+  var RENDER = {
+    products: renderProducts, orders: renderOrders, detail: renderDetail,
+    order: renderOrder, created: renderCreated,
+    create: function(){ renderForm("create"); },
+    edit:   function(){ renderForm("edit"); }
+  };
+  var KEYS = ["products","create","created","detail","edit","orders","order","events","analytics","settings"];
+
+  function go(key, push){
     if (KEYS.indexOf(key) < 0) key = "products";
+    if (key === "create" && (!draft || draft.id)) {
+      draft = {t:"", desc:"", price:"", qty:"", art:null, status:"draft"};
+    }
+    if (key === "edit") {
+      var p = byId(sel.product);
+      if (!p) { key = "products"; } else { draft = Object.assign({}, p); }
+    }
+    if (RENDER[key]) RENDER[key]();
     document.querySelectorAll(".pg").forEach(function(s){ s.hidden = s.dataset.pg !== key; });
     window.scrollTo(0, 0);
     if (push !== false) history.pushState({k: key}, "", "#" + key);
   }
-  window.addEventListener("popstate", function(e){ show((e.state && e.state.k) || "products", false); });
+  window.go = go;
+
+  window.addEventListener("popstate", function(e){ go((e.state && e.state.k) || "products", false); });
+
   document.addEventListener("click", function(e){
+    var copy = e.target.closest("[data-copy]");
+    if (copy) {
+      e.preventDefault(); e.stopPropagation();
+      var url = "bumpy.fm/s/" + copy.dataset.copy;
+      if (navigator.clipboard) navigator.clipboard.writeText("https://" + url).catch(function(){});
+      toast("Link copied — " + url);
+      return;
+    }
+    var tog = e.target.closest("[data-toggle]");
+    if (tog) {
+      e.preventDefault(); e.stopPropagation();
+      var p = byId(tog.dataset.toggle);
+      if (p) {
+        p.status = p.status === "published" ? "unpublished" : "published";
+        toast(p.status === "published" ? "Published" : "Unpublished");
+      }
+      go(tog.dataset.then || "detail");
+      return;
+    }
     if (e.target.closest("[data-stop]")) { e.preventDefault(); e.stopPropagation(); return; }
     var el = e.target.closest("[data-go]");
     if (!el) return;
     e.preventDefault();
-    show(el.dataset.go);
+    if (el.dataset.id) {
+      if (el.dataset.go === "order") sel.order = el.dataset.id; else sel.product = el.dataset.id;
+    }
+    go(el.dataset.go);
   });
+
   var start = (location.hash || "#products").slice(1);
+  if (KEYS.indexOf(start) < 0) start = "products";
   history.replaceState({k: start}, "", "#" + start);
-  show(start, false);
+  go(start, false);
+})();
 </script>
+
+<script>document.getElementById("c-events").innerHTML = '<div class="ph"><div><h1>Events</h1><p>Not part of this prototype.</p></div></div><div class="card"><div class="empty"><h3>Outside the Store prototype</h3><p>This is the existing Events section of the partner dashboard.</p><button class="btn" data-go="products">Back to Products</button></div></div>';</script>
+<script>document.getElementById("c-analytics").innerHTML = '<div class="ph"><div><h1>Analytics</h1><p>Not part of this prototype.</p></div></div><div class="card"><div class="empty"><h3>Outside the Store prototype</h3><p>This is the existing Analytics section of the partner dashboard.</p><button class="btn" data-go="products">Back to Products</button></div></div>';</script>
+<script>document.getElementById("c-settings").innerHTML = '<div class="ph"><div><h1>Settings</h1><p>Not part of this prototype.</p></div></div><div class="card"><div class="empty"><h3>Outside the Store prototype</h3><p>This is the existing Settings section of the partner dashboard.</p><button class="btn" data-go="products">Back to Products</button></div></div>';</script>
+
 </body></html>
