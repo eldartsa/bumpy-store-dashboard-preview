@@ -169,7 +169,7 @@
   .sec-lbl{font-size:12px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;
     letter-spacing:.04em;margin:0 0 8px}
 
-  .fld input.bad,.fld textarea.bad{border-color:var(--fg-error);background:#fff}
+  .fld input.bad,.fld textarea.bad,.fld select.bad{border-color:var(--fg-error);background:#fff}
   .err{display:none;color:var(--fg-error);font-size:12px;margin-top:4px}
   .err.on{display:block}
 
@@ -368,16 +368,16 @@
 (function(){
   // ---------------------------------------------------------------- data
   var PRODUCTS = [
-    {id:"sti_01", t:"Island Day Trip — Koh Larn", art:"a-island",
+    {id:"sti_01", t:"Island Day Trip — Koh Larn", art:"a-island", cat:"trip", added:"12 Aug",
      desc:"A full day off the mainland with the Afterlight crew. Speedboat out at first light, two beaches before the day-trip boats arrive, lunch on the sand, and back in time for the evening set.",
      price:2400, qty:24, sold:21, status:"published", slug:"island-day-trip-koh-larn"},
-    {id:"sti_02", t:"Sunset Boat Party", art:"a-boat",
+    {id:"sti_02", t:"Sunset Boat Party", art:"a-boat", cat:"trip", added:"28 Jul",
      desc:"Three hours on the water with the resident DJs. Open deck, one drink included.",
      price:1800, qty:60, sold:34, status:"published", slug:"sunset-boat-party"},
-    {id:"sti_03", t:"Afterlight Tee — Eclipse", art:"a-tee",
+    {id:"sti_03", t:"Afterlight Tee — Eclipse", art:"a-tee", cat:"merch", added:"03 Aug",
      desc:"Heavyweight cotton, screen-printed eclipse mark. S–XXL.",
      price:890, qty:120, sold:47, status:"published", slug:"afterlight-tee-eclipse"},
-    {id:"sti_04", t:"Airport Transfer BKK ⇄ Sukhumvit", art:"a-transfer",
+    {id:"sti_04", t:"Airport Transfer BKK ⇄ Sukhumvit", art:"a-transfer", cat:"transfer", added:"19 Aug",
      desc:"Private car, up to three bags. Booked at least 12 hours ahead.",
      price:650, qty:40, sold:12, status:"draft", slug:"airport-transfer-bkk-sukhumvit"}
   ];
@@ -395,6 +395,15 @@
   var PAY = {paid:["green","Paid"], pending:["orange","Pending"], refunded:["neutral","Refunded"]};
   // Nothing scans a store item — the seller marks the order redeemed here — so
   // the vocabulary is redemption, not "issued voucher".
+  // Generic on purpose — the seller decides what the thing actually is. Shown
+  // as the type pill on the public card.
+  var CATS = [["trip","Trip"], ["attraction","Attraction"], ["transfer","Transfer"],
+              ["merch","Merch"], ["other","Other"]];
+  function catLabel(k){
+    var m = CATS.filter(function(c){ return c[0] === k; })[0];
+    return m ? m[1] : "—";
+  }
+
   var VCH = {issued:["neutral","Not redeemed"], redeemed:["green","Redeemed"],
              void:["neutral","Void"], "—":["neutral","—"]};
 
@@ -433,26 +442,29 @@
       var left = p.qty - p.sold;
       return '<tr data-go="detail" data-id="'+p.id+'">'+
         '<td><span class="cell-t">'+art(p.art,32)+'<span class="t-name">'+esc(p.t)+'</span></span></td>'+
+        '<td class="muted">'+catLabel(p.cat)+'</td>'+
         '<td class="num">'+thb(p.price)+'</td>'+
         '<td class="num">'+p.sold+'</td>'+
         '<td class="num">'+(p.status==="draft" ? '<span class="muted">—</span>' : left)+'</td>'+
         '<td>'+badge(STATUS,p.status)+'</td>'+
+        '<td class="num muted">'+esc(p.added || "—")+'</td>'+
         '<td class="num"><button class="btn sm" data-copy="'+esc(p.slug)+'" data-stop>'+ICONS.link+'Copy link</button></td>'+
       '</tr>';
     }).join("");
 
     document.getElementById("c-products").innerHTML =
-      '<div class="ph"><div><h1>Products</h1>'+
-      "<p>Things you sell that aren't events — trips, add-ons, merch.</p></div>"+
+      '<div class="ph"><div><h1>Products</h1></div>'+
       '<button class="btn primary" data-go="create">'+ICONS.plus+'New product</button></div>'+
       '<div class="card"><div class="bar">'+
         '<input class="search" placeholder="Search products">'+
+        '<select class="filter"><option>All categories</option>'+
+        CATS.map(function(c){ return '<option>'+c[1]+'</option>'; }).join("")+'</select>'+
         '<select class="filter"><option>All statuses</option><option>Published</option><option>Draft</option></select>'+
       '</div>'+
       (PRODUCTS.length
         ? '<div class="tbl-wrap"><table class="tbl wide"><thead><tr>'+
-          '<th>Product</th><th class="num">Price</th><th class="num">Sold</th>'+
-          '<th class="num">Remaining</th><th>Status</th><th></th>'+
+          '<th>Product</th><th>Category</th><th class="num">Price</th><th class="num">Sold</th>'+
+          '<th class="num">Remaining</th><th>Status</th><th class="num">Added</th><th></th>'+
           '</tr></thead><tbody>'+rows+'</tbody></table></div>'
         : '<div class="empty"><h3>No products yet</h3>'+
           '<p>Sell a trip, an add-on, or merch alongside your events.</p>'+
@@ -512,9 +524,11 @@
             '<use href="#'+p.art+'"/></svg></div>' : '')+
           '<div class="card-b">'+
             '<p style="margin:0 0 12px;color:var(--fg-subtle);font-size:13px">'+esc(p.desc)+'</p>'+
+            '<div class="kv"><span class="k">Category</span><span class="v">'+catLabel(p.cat)+'</span></div>'+
             '<div class="kv"><span class="k">Price</span><span class="v">'+thb(p.price)+'</span></div>'+
             '<div class="kv"><span class="k">Quantity</span><span class="v">'+p.qty+'</span></div>'+
             '<div class="kv"><span class="k">Status</span><span class="v">'+badge(STATUS,p.status)+'</span></div>'+
+            '<div class="kv"><span class="k">Added</span><span class="v">'+esc(p.added || "—")+'</span></div>'+
           '</div>'+
           shareBlock(p)+
         '</div></div>'+
@@ -661,6 +675,14 @@
       '<div class="ph"><div><h1>'+(editing?"Edit product":"New product")+'</h1>'+
         "<p>Title, description and price. That's the whole thing.</p></div></div>"+
       '<div class="two"><div class="card"><div class="card-b">'+body+
+        '<div class="fld"><label for="'+fid(mode,"cat")+'">Category</label>'+
+        '<select id="'+fid(mode,"cat")+'" data-f="cat">'+
+          '<option value=""'+(d.cat?"":" selected")+' disabled>Select a category</option>'+
+          CATS.map(function(c){
+            return '<option value="'+c[0]+'"'+(d.cat===c[0]?" selected":"")+'>'+c[1]+'</option>';
+          }).join("")+
+        '</select><p class="err" id="'+eid(mode,"cat")+'">Pick a category so buyers know what this is.</p></div>'+
+        '<p class="help">Shown as the type on the public card — Trip, Merch, and so on.</p>'+
         '<div class="fld"><label for="'+fid(mode,"status")+'">Status</label>'+
         '<select id="'+fid(mode,"status")+'" data-f="status">'+
           '<option value="draft"'+(d.status==="draft"?" selected":"")+'>Draft</option>'+
@@ -713,7 +735,8 @@
 
   function save(mode){
     var bad = null;
-    FIELDS.forEach(function(f){
+    var CHECKED = FIELDS.concat([{k:"cat", type:"text"}]);
+    CHECKED.forEach(function(f){
       var v = draft[f.k], empty = f.type === "num" ? !(Number(v) > 0) : !String(v||"").trim();
       var input = document.getElementById(fid(mode, f.k)), e = document.getElementById(eid(mode, f.k));
       if (empty) { input.classList.add("bad"); e.classList.add("on"); if (!bad) bad = input; }
@@ -734,6 +757,7 @@
     }
     draft.id = "sti_" + String(PRODUCTS.length + 1).padStart(2, "0");
     draft.sold = 0;
+    draft.added = "Today";
     PRODUCTS.push(draft);
     sel.product = draft.id;
     go("created");
@@ -776,7 +800,7 @@
   function go(key, push){
     if (KEYS.indexOf(key) < 0) key = "products";
     if (key === "create" && (!draft || draft.id)) {
-      draft = {t:"", desc:"", price:"", qty:"", art:null, status:"draft"};
+      draft = {t:"", desc:"", price:"", qty:"", art:null, cat:"", status:"draft"};
     }
     if (key === "edit") {
       var p = byId(sel.product);
