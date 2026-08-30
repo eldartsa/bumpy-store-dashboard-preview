@@ -154,6 +154,54 @@
   .qr{width:56px;height:56px;background:#fff;border:1px solid var(--border-base);border-radius:6px;padding:3px;flex-shrink:0}
   .qr svg{display:block;width:100%;height:100%}
 
+  /* ---------------------------------------------------------------- ORDER MODAL
+     Same shell as the event-operations prototype: the list never navigates
+     away, a row opens a centred dialog over a dimmed backdrop. Values below
+     are that prototype's. */
+  .detail-backdrop{position:fixed;inset:0;z-index:900;display:none;align-items:center;
+    justify-content:center;background:rgba(17,24,39,.36);padding:20px}
+  .detail-backdrop.open{display:flex}
+  .detail-dialog{width:min(760px,100%);max-height:min(720px,calc(100dvh - 40px));
+    display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border-base);
+    border-radius:var(--r-lg);background:var(--bg-base);box-shadow:var(--shadow-pop)}
+  .detail-header{display:flex;align-items:center;justify-content:space-between;gap:16px;
+    flex:0 0 auto;border-bottom:1px solid var(--border-base);padding:20px 24px 18px}
+  .detail-title h2{color:var(--fg-base);font-size:16px;line-height:1.35;margin:0;font-weight:600}
+  .detail-title h2 span{color:var(--fg-muted);font-weight:400;margin-left:6px}
+  .row-actions{display:flex;align-items:center;gap:8px}
+
+  /* The one decision worth making now sits inline; everything else hides in
+     the kebab. That split is the whole idea of this pattern. */
+  .kebab{position:relative;display:inline-flex}
+  .kebab > button,.icon-close{width:32px;height:32px;border-radius:var(--r);border:1px solid var(--border-base);
+    background:var(--bg-base);color:var(--fg-subtle);display:grid;place-items:center;cursor:pointer}
+  .kebab > button:hover,.icon-close:hover{background:var(--bg-subtle);color:var(--fg-base)}
+  .menu{position:absolute;top:calc(100% + 6px);right:0;z-index:30;display:none;min-width:184px;
+    overflow:hidden;border:1px solid var(--border-base);border-radius:6px;background:var(--bg-base);
+    box-shadow:var(--shadow-pop);padding:4px}
+  .kebab.open .menu{display:grid}
+  .menu-item{min-height:32px;display:flex;align-items:center;gap:8px;border:0;border-radius:5px;
+    background:transparent;color:var(--fg-base);padding:0 8px;font:inherit;font-size:13px;
+    text-align:left;white-space:nowrap;cursor:pointer;width:100%}
+  .menu-item:hover{background:var(--bg-component)}
+  .menu-item.danger{color:var(--fg-error)}
+  .menu-sep{height:1px;background:var(--border-base);margin:4px -4px}
+  .menu-item:disabled{color:var(--fg-muted);cursor:default}
+  .menu-item:disabled:hover{background:transparent}
+
+  .detail-body{flex:1 1 auto;min-height:0;overflow:auto;display:grid;gap:0;padding:0 24px 24px}
+  .detail-badges{display:flex;flex-wrap:wrap;gap:8px;padding:14px 0 4px}
+  .detail-section{display:grid;gap:12px;border-top:1px solid var(--border-base);padding:18px 0}
+  .detail-badges + .detail-section{border-top:0}
+  .detail-section h3{color:var(--fg-base);font-size:12px;font-weight:700;line-height:1.35;margin:0}
+  .detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:28px;row-gap:14px}
+  @media (max-width:620px){.detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .detail-field{display:grid;gap:4px;min-width:0}
+  .detail-field span{color:var(--fg-muted);font-size:11px;line-height:1.25}
+  .detail-field strong{color:var(--fg-base);font-size:13px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+  .detail-line{display:flex;align-items:center;gap:12px;justify-content:space-between}
+  .detail-note{color:var(--fg-muted);font-size:12px}
+
   /* ---- empty state ---- */
   .empty{padding:52px 20px;text-align:center}
   .empty h3{font-size:15px;font-weight:600;margin:0 0 4px}
@@ -295,22 +343,7 @@
   </nav>
   <div class="side-foot"><span>Bumpy Partner</span></div>
 </aside>
-<div class="main"><div class="content" id="c-orders"></div></div></section><section class="pg" data-pg="order" hidden>
-<aside class="side">
-  <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
-  <nav class="nav">
-    <a class="nav-a" data-go="events"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Events</a>
-    <a class="nav-a on" data-go="products"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8"/></svg>Store</a>
-    <div class="subnav">
-      <a class="nav-a" data-go="products">Products</a>
-      <a class="nav-a on" data-go="orders">Orders</a>
-    </div>
-    <a class="nav-a" data-go="analytics"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Analytics</a>
-    <a class="nav-a" data-go="settings"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Settings</a>
-  </nav>
-  <div class="side-foot"><span>Bumpy Partner</span></div>
-</aside>
-<div class="main"><div class="content" id="c-order"></div></div></section><section class="pg" data-pg="events" hidden>
+<div class="main"><div class="content" id="c-orders"></div></div></section><section class="pg" data-pg="events" hidden>
 <aside class="side">
   <div class="brand"><span class="avatar">AF</span><span>Afterlight</span></div>
   <nav class="nav">
@@ -356,6 +389,7 @@
   <div class="side-foot"><span>Bumpy Partner</span></div>
 </aside>
 <div class="main"><div class="content" id="c-settings"></div></div></section>
+<div class="detail-backdrop" id="order-modal"></div>
 <div id="toast" role="status" aria-live="polite"></div>
 <script>
   window.__ICONS = {
@@ -408,6 +442,7 @@
              void:["neutral","Void"], "—":["neutral","—"]};
 
   var sel = {product:"sti_01", order:"2117"};
+  var modalOpen = false;
   var draft = null;   // the product being created / edited
 
   // ---------------------------------------------------------------- helpers
@@ -475,20 +510,24 @@
   function orderRow(o, compact){
     var p = byId(o.pid) || {t:"—", art:null};
     if (compact) {
-      return '<tr data-go="order" data-id="'+o.no+'">'+
+      return '<tr data-order="'+o.no+'">'+
         '<td><span class="t-name">#'+o.no+'</span></td>'+
         '<td><span class="t-name">'+esc(o.buyer)+'</span><div class="t-sub">'+esc(o.email)+'</div></td>'+
         '<td class="num">'+thb(o.amount)+'</td>'+
         '<td>'+badge(PAY,o.pay)+'</td>'+
         '<td class="num muted">'+o.when+'</td></tr>';
     }
-    return '<tr data-go="order" data-id="'+o.no+'">'+
+    return '<tr data-order="'+o.no+'">'+
       '<td><span class="t-name">#'+o.no+'</span></td>'+
       '<td><span class="t-name">'+esc(o.buyer)+'</span><div class="t-sub">'+esc(o.email)+'</div></td>'+
       '<td><span class="cell-t">'+art(p.art,26)+'<span class="t-name">'+esc(p.t)+'</span></span></td>'+
       '<td class="num">'+o.qty+'</td><td class="num">'+thb(o.amount)+'</td>'+
       '<td>'+badge(PAY,o.pay)+'</td><td>'+badge(VCH,o.vch)+'</td>'+
-      '<td class="num muted">'+o.when+'</td></tr>';
+      '<td class="num muted">'+o.when+'</td>'+
+      // same rule as the row above it in events: the live decision inline,
+      // the rest behind the kebab
+      '<td class="num"><span class="row-actions" style="justify-content:flex-end">'+
+        orderActions(o, "row")+'</span></td></tr>';
   }
 
   function renderDetail(){
@@ -545,8 +584,7 @@
 
   function renderOrders(){
     document.getElementById("c-orders").innerHTML =
-      '<div class="ph"><div><h1>Orders</h1>'+
-      '<p>Everything sold from your store, across every product.</p></div>'+
+      '<div class="ph"><div><h1>Orders</h1></div>'+
       '<button class="btn">Export</button></div>'+
       '<div class="card"><div class="bar">'+
         '<input class="search" placeholder="Search by buyer, email or order number">'+
@@ -555,81 +593,106 @@
         '<select class="filter"><option>All statuses</option><option>Paid</option><option>Pending</option><option>Refunded</option></select>'+
       '</div><div class="tbl-wrap"><table class="tbl wide"><thead><tr>'+
         '<th>Order</th><th>Buyer</th><th>Product</th><th class="num">Qty</th>'+
-        '<th class="num">Amount</th><th>Payment</th><th>Redemption</th><th class="num">Date</th>'+
+        '<th class="num">Amount</th><th>Payment</th><th>Redemption</th><th class="num">Date</th><th></th>'+
       '</tr></thead><tbody>'+ORDERS.map(function(o){ return orderRow(o,false); }).join("")+
       '</tbody></table></div></div>';
   }
 
-  // The buyer quotes this; the seller finds the order and marks it used. Stored
-  // per order, not derived — it has to be exactly what the buyer is holding,
-  // and #2117 is the order the storefront prototype issues.
-  function voucherRef(o){ return o.ref || "----.----"; }
+  var I_KEBAB = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'+
+    '<circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>';
 
-  // Redemption is a dashboard action, not a scan. The footer states what the
-  // seller can do right now, and says why when they can't.
-  function redeemFooter(o){
-    // Refunded first: a refunded order is also "not paid", and telling the
-    // seller to wait for payment on money they already gave back is wrong.
-    if (o.vch === "void" || o.pay === "refunded") {
-      return '<div class="share" style="background:var(--bg-subtle)">'+
-        '<code>Refunded — this order can no longer be redeemed.</code></div>';
+  // Actions for one order, split the way the event-operations prototype splits
+  // them: the decision you are here to make is a button; the rest are a menu.
+  function orderActions(o, ctx){
+    var inline = "", items = [];
+    var canRedeem = o.pay === "paid" && o.vch === "issued";
+    var isRedeemed = o.vch === "redeemed";
+
+    if (canRedeem) {
+      inline = '<button class="btn primary'+(ctx === "row" ? " sm" : "")+'" data-redeem="'+o.no+
+        '" data-set="redeemed">'+(ctx === "row" ? "Redeem" : "Mark as redeemed")+'</button>';
+    } else if (isRedeemed) {
+      items.push('<button class="menu-item" data-redeem="'+o.no+'" data-set="issued">Undo redemption</button>');
     }
-    if (o.pay !== "paid") {
-      return '<div class="share" style="background:var(--bg-subtle)">'+
-        '<code>Nothing to redeem until the order is paid.</code></div>';
+    items.push('<button class="menu-item" data-resend="'+o.no+'">Resend voucher</button>');
+    items.push('<button class="menu-item" data-copyref="'+o.no+'">Copy voucher reference</button>');
+    if (o.pay === "paid") {
+      items.push('<div class="menu-sep"></div>');
+      items.push('<button class="menu-item danger" data-refund="'+o.no+'">Refund</button>');
     }
-    if (o.vch === "redeemed") {
-      return '<div class="share" style="background:var(--bg-subtle)">'+
-        '<code>Marked redeemed by you.</code>'+
-        '<button class="btn sm" data-redeem="'+o.no+'" data-set="issued">Undo</button></div>';
-    }
-    return '<div class="share">'+
-      '<code>The buyer gives you the voucher; you mark it used here.</code>'+
-      '<button class="btn primary" data-redeem="'+o.no+'" data-set="redeemed">Mark as redeemed</button></div>';
+    return inline +
+      '<span class="kebab" data-kebab><button type="button" aria-label="Order actions" data-stop>'+
+      I_KEBAB+'</button><div class="menu">'+items.join("")+'</div></span>';
   }
 
-  function renderOrder(){
-    var o = ORDERS.filter(function(x){ return x.no === sel.order; })[0] || ORDERS[0];
+  function field(label, value){
+    return '<div class="detail-field"><span>'+label+'</span><strong>'+value+'</strong></div>';
+  }
+
+  // The order lives at its own hash, so it deep-links for support — but it
+  // renders as a dialog over the list rather than as a page you navigate to.
+  function renderOrderModal(){
+    var host = document.getElementById("order-modal");
+    var o = ORDERS.filter(function(x){ return x.no === sel.order; })[0];
+    if (!o || !modalOpen) { host.className = "detail-backdrop"; host.innerHTML = ""; return; }
     var p = byId(o.pid) || {t:"—", art:null, price:0};
     var sub = p.price * o.qty, fee = o.amount - sub;
-    document.getElementById("c-order").innerHTML =
-      '<div class="crumb"><a data-go="orders">Orders</a>'+ICONS.chev+'<span>#'+o.no+'</span></div>'+
-      '<div class="ph"><div><h1>Order #'+o.no+'</h1><p>'+o.when+' · '+badge(PAY,o.pay)+'</p></div>'+
-        '<div style="display:flex;gap:8px"><button class="btn">Resend voucher</button>'+
-        '<button class="btn danger">Refund</button></div></div>'+
-      '<div class="two"><div>'+
-        '<div class="card"><div class="card-h"><h2>Items</h2></div>'+
-          '<div class="tbl-wrap"><table class="tbl"><tbody><tr style="cursor:default">'+
-            '<td><span class="cell-t">'+art(p.art,32)+'<span class="t-name">'+esc(p.t)+'</span></span></td>'+
-            '<td class="num muted">'+o.qty+' × '+thb(p.price)+'</td>'+
-            '<td class="num">'+thb(sub)+'</td></tr></tbody></table></div>'+
-          '<div class="card-b">'+
+
+    host.innerHTML =
+      '<section class="detail-dialog" role="dialog" aria-modal="true" aria-labelledby="od-title">'+
+        '<header class="detail-header">'+
+          '<div class="detail-title"><h2 id="od-title">Order <span>#'+o.no+'</span></h2></div>'+
+          '<div class="row-actions">'+ orderActions(o) +
+            '<button class="icon-close" type="button" data-close aria-label="Close order details">'+
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'+
+            '</button>'+
+          '</div>'+
+        '</header>'+
+        '<div class="detail-body">'+
+          '<div class="detail-badges">'+badge(PAY,o.pay)+badge(VCH,o.vch)+'</div>'+
+
+          '<div class="detail-section"><h3>Summary</h3><div class="detail-grid">'+
+            field("Product", esc(p.t))+
+            field("Quantity", o.qty)+
+            field("Total", thb(o.amount))+
+            field("Created", o.when)+
+            field("Voucher", o.ref || "—")+
+            field("Redeemed", o.vch === "redeemed" ? (o.rat || "yes") : "—")+
+          '</div></div>'+
+
+          '<div class="detail-section"><h3>Customer</h3><div class="detail-grid">'+
+            field("Name", esc(o.buyer))+
+            field("Email", esc(o.email))+
+            field("Phone", "+66 80 123 4567")+
+            field("Date of birth", "17 Apr 1992")+
+            field("Gender", "Male")+
+          '</div></div>'+
+
+          '<div class="detail-section"><h3>Order breakdown</h3>'+
+            '<div class="detail-line"><span class="cell-t">'+art(p.art,32)+
+              '<span><span class="t-name">'+esc(p.t)+'</span>'+
+              '<div class="t-sub">'+o.qty+' × '+thb(p.price)+'</div></span></span>'+
+              '<strong>'+thb(sub)+'</strong></div>'+
             '<div class="kv"><span class="k">Subtotal</span><span class="v">'+thb(sub)+'</span></div>'+
+            // fee carved out here as everywhere else — the seller sees what Bumpy took
             '<div class="kv"><span class="k">Service fee</span><span class="v">'+thb(fee)+'</span></div>'+
             '<div class="kv"><span class="k" style="color:var(--fg-base);font-weight:600">Total</span>'+
-            '<span class="v" style="font-size:15px">'+thb(o.amount)+'</span></div>'+
-          '</div></div>'+
-        '<div class="card"><div class="card-h"><h2>Payment</h2></div><div class="card-b">'+
-          '<div class="kv"><span class="k">Status</span><span class="v">'+badge(PAY,o.pay)+'</span></div>'+
-          '<div class="kv"><span class="k">Method</span><span class="v">Visa •••• 4242</span></div>'+
-          '<div class="kv"><span class="k">Stripe reference</span><span class="v" style="font-family:\'Roboto Mono\',monospace;font-size:12px">pi_3QxR8kL2eZv</span></div>'+
-          '<div class="kv"><span class="k">Captured</span><span class="v">'+o.when+'</span></div>'+
-        '</div></div></div>'+
-        '<div><div class="card"><div class="card-h"><h2>Buyer</h2></div><div class="card-b">'+
-          '<div class="kv"><span class="k">Name</span><span class="v">'+esc(o.buyer)+'</span></div>'+
-          '<div class="kv"><span class="k">Email</span><span class="v">'+esc(o.email)+'</span></div>'+
-          '<div class="kv"><span class="k">Phone</span><span class="v">+66 80 123 4567</span></div>'+
-          '<div class="kv"><span class="k">Date of birth</span><span class="v">17 Apr 1992</span></div>'+
-          '<div class="kv"><span class="k">Gender</span><span class="v">Male</span></div>'+
-        '</div></div>'+
-        '<div class="card"><div class="card-h"><h2>Redemption</h2></div><div class="card-b">'+
-          '<div class="kv"><span class="k">Voucher</span><span class="v" style="font-family:\'Roboto Mono\',monospace;font-size:13px;letter-spacing:.06em">'+voucherRef(o)+'</span></div>'+
-          '<div class="kv"><span class="k">Admits</span><span class="v">'+o.qty+' people</span></div>'+
-          '<div class="kv"><span class="k">Status</span><span class="v">'+badge(VCH,o.vch)+'</span></div>'+
-          (o.vch === "redeemed" && o.rat
-            ? '<div class="kv"><span class="k">Redeemed</span><span class="v">'+o.rat+'</span></div>' : '')+
-        '</div>'+ redeemFooter(o) +'</div>'+
-      '</div></div>';
+              '<span class="v" style="font-size:15px">'+thb(o.amount)+'</span></div>'+
+          '</div>'+
+
+          '<div class="detail-section"><h3>Payment</h3><div class="detail-grid">'+
+            field("Status", badge(PAY,o.pay))+
+            field("Method", "Visa •••• 4242")+
+            field("Stripe reference", "pi_3QxR8kL2eZv")+
+          '</div>'+
+          (o.pay !== "paid" && o.pay !== "refunded"
+            ? '<p class="detail-note">Nothing to redeem until the order is paid.</p>' : '')+
+          (o.pay === "refunded"
+            ? '<p class="detail-note">Refunded — this order can no longer be redeemed.</p>' : '')+
+          '</div>'+
+        '</div>'+
+      '</section>';
+    host.className = "detail-backdrop open";
   }
 
   // ------------------------------------------------------------ the form
@@ -791,14 +854,30 @@
   // ---------------------------------------------------------------- router
   var RENDER = {
     products: renderProducts, orders: renderOrders, detail: renderDetail,
-    order: renderOrder, created: renderCreated,
+    created: renderCreated,
     create: function(){ renderForm("create"); },
     edit:   function(){ renderForm("edit"); }
   };
-  var KEYS = ["products","create","created","detail","edit","orders","order","events","analytics","settings"];
+  var KEYS = ["products","create","created","detail","edit","orders","events","analytics","settings"];
+
+  // An open order is "orders" plus a hash suffix: the page underneath is still
+  // the list, so the dialog can deep-link for support without becoming a route
+  // of its own.
+  function openOrder(no){
+    sel.order = no; modalOpen = true;
+    renderOrderModal();
+    history.pushState({k:"orders", o:no}, "", "#orders/" + no);
+    document.body.style.overflow = "hidden";
+  }
+  function closeOrder(push){
+    modalOpen = false; renderOrderModal();
+    document.body.style.overflow = "";
+    if (push !== false) history.pushState({k:"orders"}, "", "#orders");
+  }
 
   function go(key, push){
     if (KEYS.indexOf(key) < 0) key = "products";
+    if (modalOpen) { modalOpen = false; renderOrderModal(); document.body.style.overflow = ""; }
     if (key === "create" && (!draft || draft.id)) {
       draft = {t:"", desc:"", price:"", qty:"", art:null, cat:"", status:"draft"};
     }
@@ -813,9 +892,51 @@
   }
   window.go = go;
 
-  window.addEventListener("popstate", function(e){ go((e.state && e.state.k) || "products", false); });
+  window.addEventListener("popstate", function(e){
+    var st = e.state || {};
+    go(st.k || "products", false);
+    if (st.o) { sel.order = st.o; modalOpen = true; renderOrderModal(); document.body.style.overflow = "hidden"; }
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape") { if (modalOpen) closeOrder(); else closeMenus(); }
+  });
+
+  function closeMenus(){
+    document.querySelectorAll(".kebab.open").forEach(function(k){ k.classList.remove("open"); });
+  }
 
   document.addEventListener("click", function(e){
+    var keb = e.target.closest("[data-kebab]");
+    var wasOpen = keb && keb.classList.contains("open");
+    if (!e.target.closest(".menu")) closeMenus();
+    if (keb && !e.target.closest(".menu")) {
+      e.preventDefault(); e.stopPropagation();
+      if (!wasOpen) keb.classList.add("open");
+      return;
+    }
+
+    if (e.target.closest("[data-close]")) { e.preventDefault(); closeOrder(); return; }
+    if (e.target === document.getElementById("order-modal")) { closeOrder(); return; }
+
+    var resend = e.target.closest("[data-resend]");
+    if (resend) { e.preventDefault(); e.stopPropagation(); toast("Voucher resent to the buyer"); return; }
+    var cref = e.target.closest("[data-copyref]");
+    if (cref) {
+      e.preventDefault(); e.stopPropagation();
+      var co = ORDERS.filter(function(x){ return x.no === cref.dataset.copyref; })[0];
+      if (co && navigator.clipboard) navigator.clipboard.writeText(co.ref).catch(function(){});
+      toast("Voucher reference copied" + (co ? " — " + co.ref : ""));
+      return;
+    }
+    var ref = e.target.closest("[data-refund]");
+    if (ref) {
+      e.preventDefault(); e.stopPropagation();
+      var ro = ORDERS.filter(function(x){ return x.no === ref.dataset.refund; })[0];
+      if (ro) { ro.pay = "refunded"; ro.vch = "void"; ro.rat = null; toast("Order #"+ro.no+" refunded"); }
+      renderOrders(); renderOrderModal();
+      return;
+    }
+
     var copy = e.target.closest("[data-copy]");
     if (copy) {
       e.preventDefault(); e.stopPropagation();
@@ -833,7 +954,7 @@
         ord.rat = ord.vch === "redeemed" ? "just now" : null;
         toast(ord.vch === "redeemed" ? "Order #"+ord.no+" redeemed" : "Redemption undone");
       }
-      renderOrder(); renderOrders();
+      renderOrders(); renderOrderModal();
       return;
     }
     var tog = e.target.closest("[data-toggle]");
@@ -848,6 +969,10 @@
       return;
     }
     if (e.target.closest("[data-stop]")) { e.preventDefault(); e.stopPropagation(); return; }
+
+    var row = e.target.closest("[data-order]");
+    if (row) { e.preventDefault(); openOrder(row.dataset.order); return; }
+
     var el = e.target.closest("[data-go]");
     if (!el) return;
     e.preventDefault();
@@ -857,10 +982,15 @@
     go(el.dataset.go);
   });
 
-  var start = (location.hash || "#products").slice(1);
-  if (KEYS.indexOf(start) < 0) start = "products";
-  history.replaceState({k: start}, "", "#" + start);
+  var raw = (location.hash || "#products").slice(1);
+  var parts = raw.split("/");
+  var start = KEYS.indexOf(parts[0]) < 0 ? "products" : parts[0];
+  history.replaceState({k: start, o: parts[1] || null}, "", location.hash || "#products");
   go(start, false);
+  if (start === "orders" && parts[1]) {
+    sel.order = parts[1]; modalOpen = true; renderOrderModal();
+    document.body.style.overflow = "hidden";
+  }
 })();
 </script>
 
