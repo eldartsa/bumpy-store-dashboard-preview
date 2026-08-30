@@ -172,26 +172,6 @@
   .err{display:none;color:var(--fg-error);font-size:12px;margin-top:4px}
   .err.on{display:block}
 
-  /* Live preview of the buyer's card. A store item has no browse surface, so
-     the card IS how it gets seen — the seller should watch it build as they
-     type rather than guess and check on the public page. */
-  /* The preview is a fragment of the storefront, so it carries the
-     storefront's surface, not the panel's. */
-  .prev{border:1px solid rgba(255,255,255,.09);border-radius:var(--r-lg);overflow:hidden;background:#050507}
-  .prev .art{aspect-ratio:4/3;background:#141416;position:relative;overflow:hidden}
-  .prev .art svg{display:block;width:100%;height:100%}
-  .prev .art .ph-art{display:grid;place-items:center;height:100%;color:#52525b;font-size:12px}
-  .prev .bd{padding:10px 12px 12px}
-  .prev h4{margin:0;font-size:14px;font-weight:600;color:#f6f5f4;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .prev .d{color:#a8a29e;font-size:12px;margin-top:2px;
-    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .prev .p{color:#f6f5f4;font-size:13px;font-weight:700;margin-top:8px}
-  .prev .p small{color:#8a8481;font-weight:500}
-  .prev .left{color:#ffc46b;font-size:12px;font-weight:500;margin-top:3px}
-  .prev-wrap{background:#0a0a0c;padding:14px;border-radius:var(--r-lg)}
-  .prev-note{color:var(--fg-muted);font-size:12px;margin:8px 0 0;text-align:center}
-
   /* Published moment */
   .done{text-align:center;padding:34px 20px 26px}
   .done .tick{width:44px;height:44px;border-radius:50%;background:var(--tag-green-bg);
@@ -656,15 +636,8 @@
         '</select></div>'+
         '<p class="help">A draft is only visible to you. Publishing makes the link live.</p>'+
       '</div></div>'+
-      '<div><div class="card"><div class="card-h"><h2>Image</h2></div><div class="card-b">'+
-        '<div class="drop" id="'+mode+'-drop">Drop an image, or click to upload<br>'+
-        '<span style="font-size:12px">JPG or PNG, square works best</span></div>'+
-        '<p class="help" style="margin:10px 0 0">Click to drop in a sample image.</p>'+
-      '</div></div>'+
-      '<div class="card"><div class="card-h"><h2>Preview</h2>'+
-        '<span class="t-sub">On the producer page</span></div>'+
-      '<div class="card-b"><div class="prev-wrap"><div class="prev" id="'+mode+'-prev"></div></div>'+
-      '<p class="prev-note">This is the card a buyer sees.</p></div></div>'+
+      '<div><div class="card"><div class="card-h"><h2>Image</h2></div>'+
+        '<div class="card-b" id="'+mode+'-img"></div></div>'+
       '<div class="card"><div class="card-b" style="display:flex;gap:8px;flex-wrap:wrap">'+
         '<button class="btn primary" id="'+mode+'-save">'+(editing?"Save changes":"Create product")+'</button>'+
         '<button class="btn" data-go="'+(editing?"detail":"products")+'">Cancel</button>'+
@@ -676,37 +649,33 @@
         el.classList.remove("bad");
         var e = document.getElementById(eid(mode, el.dataset.f));
         if (e) e.classList.remove("on");
-        paintPreview(mode);
       });
-      el.addEventListener("change", function(){ draft[el.dataset.f] = el.value; paintPreview(mode); });
+      el.addEventListener("change", function(){ draft[el.dataset.f] = el.value; });
     });
-    // Placeholder for a real upload; cycles the sample scenes so the preview
-    // and the resulting card have artwork to show.
+    document.getElementById(mode + "-save").addEventListener("click", function(){ save(mode); });
+    paintImage(mode);   // placeholder for a real upload: cycles the sample scenes
+  }
+
+  // Shows what has actually been uploaded. Not a preview of the public card —
+  // just the field reflecting its own value, the way an upload field should.
+  function paintImage(mode){
+    var el = document.getElementById(mode + "-img");
+    if (!el) return;
+    el.innerHTML =
+      (draft.art
+        ? '<div style="border-radius:8px;overflow:hidden;border:1px solid var(--border-base);'+
+          'margin-bottom:10px;height:140px"><svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" '+
+          'style="display:block;width:100%;height:100%"><use href="#'+draft.art+'"/></svg></div>'
+        : '')+
+      '<div class="drop" id="'+mode+'-drop">'+
+        (draft.art ? 'Replace image' : 'Drop an image, or click to upload')+'<br>'+
+        '<span style="font-size:12px">JPG or PNG, square works best</span></div>';
     var SCENES = ["a-island","a-boat","a-tee","a-transfer"];
     document.getElementById(mode + "-drop").addEventListener("click", function(){
       var i = SCENES.indexOf(draft.art);
       draft.art = SCENES[(i + 1) % SCENES.length];
-      paintPreview(mode);
+      paintImage(mode);
     });
-    document.getElementById(mode + "-save").addEventListener("click", function(){ save(mode); });
-    paintPreview(mode);
-  }
-
-  function paintPreview(mode){
-    var el = document.getElementById(mode + "-prev");
-    if (!el) return;
-    var d = draft, left = (Number(d.qty)||0) - (Number(d.sold)||0);
-    el.innerHTML =
-      '<div class="art">'+(d.art
-        ? '<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><use href="#'+d.art+'"/></svg>'
-        : '<div class="ph-art">No image yet</div>')+'</div>'+
-      '<div class="bd">'+
-        '<h4>'+(esc(d.t) || '<span style="color:#52525b">Untitled</span>')+'</h4>'+
-        '<div class="d">'+(esc(d.desc) || '&nbsp;')+'</div>'+
-        (left > 0 && left <= 5 ? '<div class="left">Only '+left+' left</div>' : '')+
-        '<div class="p">'+(Number(d.price) ? Number(d.price).toLocaleString("en-US") : '—')+
-          ' <small>THB</small></div>'+
-      '</div>';
   }
 
   function save(mode){
