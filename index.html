@@ -148,6 +148,7 @@
   /* ---- share link ---- */
   .share{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg-highlight);
     border-top:1px solid var(--border-base)}
+  .share .btn{flex-shrink:0}
   .share code{flex:1;min-width:0;font-family:"Roboto Mono",ui-monospace,monospace;font-size:12px;
     color:var(--fg-subtle);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .qr{width:56px;height:56px;background:#fff;border:1px solid var(--border-base);border-radius:6px;padding:3px;flex-shrink:0}
@@ -381,18 +382,21 @@
      price:650, qty:40, sold:12, status:"draft", slug:"airport-transfer-bkk-sukhumvit"}
   ];
   var ORDERS = [
-    {no:"2117", buyer:"Eldar Tsabari", email:"eldar@example.com", pid:"sti_01", qty:2, amount:5088, pay:"paid", vch:"issued", when:"30 Aug, 14:02"},
-    {no:"2116", buyer:"Maya Cohen", email:"maya@example.com", pid:"sti_03", qty:1, amount:943, pay:"paid", vch:"redeemed", when:"30 Aug, 11:47"},
-    {no:"2115", buyer:"Tom Alperin", email:"tom@example.com", pid:"sti_02", qty:4, amount:7632, pay:"paid", vch:"issued", when:"29 Aug, 22:10"},
-    {no:"2114", buyer:"Noa Barak", email:"noa@example.com", pid:"sti_01", qty:1, amount:2544, pay:"refunded", vch:"void", when:"29 Aug, 18:33"},
-    {no:"2113", buyer:"Dan Levi", email:"dan@example.com", pid:"sti_03", qty:3, amount:2830, pay:"paid", vch:"redeemed", when:"29 Aug, 09:05"},
-    {no:"2112", buyer:"Rin Suwan", email:"rin@example.com", pid:"sti_02", qty:2, amount:3816, pay:"pending", vch:"—", when:"28 Aug, 20:51"}
+    {no:"2117", ref:"8K2M-4QP7", buyer:"Eldar Tsabari", email:"eldar@example.com", pid:"sti_01", qty:2, amount:5088, pay:"paid", vch:"issued", when:"30 Aug, 14:02"},
+    {no:"2116", ref:"QP7Z-R3TW", buyer:"Maya Cohen", email:"maya@example.com", pid:"sti_03", qty:1, amount:943, pay:"paid", vch:"redeemed", rat:"30 Aug, 12:15", when:"30 Aug, 11:47"},
+    {no:"2115", ref:"R3TW-X7NB", buyer:"Tom Alperin", email:"tom@example.com", pid:"sti_02", qty:4, amount:7632, pay:"paid", vch:"issued", when:"29 Aug, 22:10"},
+    {no:"2114", ref:"X7NB-2M4K", buyer:"Noa Barak", email:"noa@example.com", pid:"sti_01", qty:1, amount:2544, pay:"refunded", vch:"void", when:"29 Aug, 18:33"},
+    {no:"2113", ref:"2M4K-8ZQ3", buyer:"Dan Levi", email:"dan@example.com", pid:"sti_03", qty:3, amount:2830, pay:"paid", vch:"redeemed", rat:"29 Aug, 10:40", when:"29 Aug, 09:05"},
+    {no:"2112", ref:"8ZQ3-TW7N", buyer:"Rin Suwan", email:"rin@example.com", pid:"sti_02", qty:2, amount:3816, pay:"pending", vch:"—", when:"28 Aug, 20:51"}
   ];
 
   var STATUS = {published:["green","Published"], draft:["neutral","Draft"],
                 unpublished:["orange","Unpublished"], archived:["neutral","Archived"]};
   var PAY = {paid:["green","Paid"], pending:["orange","Pending"], refunded:["neutral","Refunded"]};
-  var VCH = {issued:["blue","Issued"], redeemed:["green","Redeemed"], void:["neutral","Void"], "—":["neutral","—"]};
+  // Nothing scans a store item — the seller marks the order redeemed here — so
+  // the vocabulary is redemption, not "issued voucher".
+  var VCH = {issued:["neutral","Not redeemed"], redeemed:["green","Redeemed"],
+             void:["neutral","Void"], "—":["neutral","—"]};
 
   var sel = {product:"sti_01", order:"2117"};
   var draft = null;   // the product being created / edited
@@ -537,9 +541,37 @@
         '<select class="filter"><option>All statuses</option><option>Paid</option><option>Pending</option><option>Refunded</option></select>'+
       '</div><div class="tbl-wrap"><table class="tbl wide"><thead><tr>'+
         '<th>Order</th><th>Buyer</th><th>Product</th><th class="num">Qty</th>'+
-        '<th class="num">Amount</th><th>Payment</th><th>Voucher</th><th class="num">Date</th>'+
+        '<th class="num">Amount</th><th>Payment</th><th>Redemption</th><th class="num">Date</th>'+
       '</tr></thead><tbody>'+ORDERS.map(function(o){ return orderRow(o,false); }).join("")+
       '</tbody></table></div></div>';
+  }
+
+  // The buyer quotes this; the seller finds the order and marks it used. Stored
+  // per order, not derived — it has to be exactly what the buyer is holding,
+  // and #2117 is the order the storefront prototype issues.
+  function voucherRef(o){ return o.ref || "----.----"; }
+
+  // Redemption is a dashboard action, not a scan. The footer states what the
+  // seller can do right now, and says why when they can't.
+  function redeemFooter(o){
+    // Refunded first: a refunded order is also "not paid", and telling the
+    // seller to wait for payment on money they already gave back is wrong.
+    if (o.vch === "void" || o.pay === "refunded") {
+      return '<div class="share" style="background:var(--bg-subtle)">'+
+        '<code>Refunded — this order can no longer be redeemed.</code></div>';
+    }
+    if (o.pay !== "paid") {
+      return '<div class="share" style="background:var(--bg-subtle)">'+
+        '<code>Nothing to redeem until the order is paid.</code></div>';
+    }
+    if (o.vch === "redeemed") {
+      return '<div class="share" style="background:var(--bg-subtle)">'+
+        '<code>Marked redeemed by you.</code>'+
+        '<button class="btn sm" data-redeem="'+o.no+'" data-set="issued">Undo</button></div>';
+    }
+    return '<div class="share">'+
+      '<code>The buyer gives you the voucher; you mark it used here.</code>'+
+      '<button class="btn primary" data-redeem="'+o.no+'" data-set="redeemed">Mark as redeemed</button></div>';
   }
 
   function renderOrder(){
@@ -576,12 +608,13 @@
           '<div class="kv"><span class="k">Date of birth</span><span class="v">17 Apr 1992</span></div>'+
           '<div class="kv"><span class="k">Gender</span><span class="v">Male</span></div>'+
         '</div></div>'+
-        '<div class="card"><div class="card-h"><h2>Voucher</h2></div><div class="card-b">'+
-          '<div class="kv"><span class="k">Number</span><span class="v" style="font-family:\'Roboto Mono\',monospace;font-size:12px">VCH-8K2M-4QP7</span></div>'+
+        '<div class="card"><div class="card-h"><h2>Redemption</h2></div><div class="card-b">'+
+          '<div class="kv"><span class="k">Voucher</span><span class="v" style="font-family:\'Roboto Mono\',monospace;font-size:13px;letter-spacing:.06em">'+voucherRef(o)+'</span></div>'+
           '<div class="kv"><span class="k">Admits</span><span class="v">'+o.qty+' people</span></div>'+
           '<div class="kv"><span class="k">Status</span><span class="v">'+badge(VCH,o.vch)+'</span></div>'+
-        '</div><div class="share"><span class="qr">'+ICONS.qr+'</span>'+
-          '<code>Scanned at the door with Bumpy Access</code></div></div>'+
+          (o.vch === "redeemed" && o.rat
+            ? '<div class="kv"><span class="k">Redeemed</span><span class="v">'+o.rat+'</span></div>' : '')+
+        '</div>'+ redeemFooter(o) +'</div>'+
       '</div></div>';
   }
 
@@ -765,6 +798,18 @@
       var url = "bumpy.fm/s/" + copy.dataset.copy;
       if (navigator.clipboard) navigator.clipboard.writeText("https://" + url).catch(function(){});
       toast("Link copied — " + url);
+      return;
+    }
+    var red = e.target.closest("[data-redeem]");
+    if (red) {
+      e.preventDefault(); e.stopPropagation();
+      var ord = ORDERS.filter(function(x){ return x.no === red.dataset.redeem; })[0];
+      if (ord) {
+        ord.vch = red.dataset.set;
+        ord.rat = ord.vch === "redeemed" ? "just now" : null;
+        toast(ord.vch === "redeemed" ? "Order #"+ord.no+" redeemed" : "Redemption undone");
+      }
+      renderOrder(); renderOrders();
       return;
     }
     var tog = e.target.closest("[data-toggle]");
