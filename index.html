@@ -182,6 +182,11 @@
     overflow:hidden;border:1px solid var(--border-base);border-radius:6px;background:var(--bg-base);
     box-shadow:var(--shadow-pop);padding:4px}
   .kebab.open .menu{display:grid}
+  /* A row menu lives inside .tbl-wrap (overflow-x:auto) and .card
+     (overflow:hidden), so an absolutely-positioned one is clipped on the last
+     rows. Fixed positioning takes it out of both, same as the events
+     prototype's .floating-menu. */
+  .menu.floating{position:fixed;top:var(--mt);left:var(--ml);right:auto;z-index:1000}
   .menu-item{min-height:32px;display:flex;align-items:center;gap:8px;border:0;border-radius:5px;
     background:transparent;color:var(--fg-base);padding:0 8px;font:inherit;font-size:13px;
     text-align:left;white-space:nowrap;cursor:pointer;width:100%}
@@ -483,6 +488,7 @@
 
   var sel = {product:"sti_01", order:"2117"};
   var modalOpen = false;
+  var curPage = "products";
   var draft = null;   // the product being created / edited
 
   // ---------------------------------------------------------------- helpers
@@ -523,7 +529,8 @@
         '<td class="num">'+(p.status==="draft" ? '<span class="muted">—</span>' : left)+'</td>'+
         '<td>'+badge(STATUS,p.status)+'</td>'+
         '<td class="num muted">'+esc(p.added || "—")+'</td>'+
-        '<td class="num"><button class="btn sm" data-copy="'+esc(p.slug)+'" data-stop>'+ICONS.link+'Copy link</button></td>'+
+        '<td class="num"><span class="row-actions" style="justify-content:flex-end">'+
+          productActions(p)+'</span></td>'+
       '</tr>';
     }).join("");
 
@@ -1049,6 +1056,7 @@
       var p = byId(sel.product);
       if (!p) { key = "products"; } else { draft = Object.assign({}, p); }
     }
+    curPage = key;
     if (RENDER[key]) RENDER[key]();
     document.querySelectorAll(".pg").forEach(function(s){ s.hidden = s.dataset.pg !== key; });
     window.scrollTo(0, 0);
@@ -1070,8 +1078,16 @@
   });
 
   function closeMenus(){
-    document.querySelectorAll(".kebab.open").forEach(function(k){ k.classList.remove("open"); });
+    document.querySelectorAll(".kebab.open").forEach(function(k){
+      k.classList.remove("open");
+      var m = k.querySelector(".menu");
+      if (m) m.classList.remove("floating");
+    });
   }
+  // a floating menu is positioned from a rect, so it has to go when that
+  // rect moves
+  window.addEventListener("scroll", closeMenus, true);
+  window.addEventListener("resize", closeMenus);
 
   document.addEventListener("click", function(e){
     var keb = e.target.closest("[data-kebab]");
@@ -1079,9 +1095,29 @@
     if (!e.target.closest(".menu")) closeMenus();
     if (keb && !e.target.closest(".menu")) {
       e.preventDefault(); e.stopPropagation();
-      if (!wasOpen) keb.classList.add("open");
+      if (!wasOpen) {
+        keb.classList.add("open");
+        var menu = keb.querySelector(".menu");
+        if (keb.closest(".tbl-wrap")) {
+          var r = keb.getBoundingClientRect();
+          menu.classList.add("floating");
+          menu.style.setProperty("--mt", (r.bottom + 6) + "px");
+          // measured after it is displayed, so it can be pulled back on screen
+          var w = menu.offsetWidth;
+          var left = Math.min(r.right - w, window.innerWidth - w - 8);
+          menu.style.setProperty("--ml", Math.max(8, left) + "px");
+          var below = window.innerHeight - r.bottom - 12;
+          if (menu.offsetHeight > below) {
+            menu.style.setProperty("--mt", Math.max(8, r.top - menu.offsetHeight - 6) + "px");
+          }
+        }
+      }
       return;
     }
+
+    // Choosing an item dismisses the menu. Every branch below returns early,
+    // so without this the menu stayed open behind whatever it just did.
+    if (e.target.closest(".menu-item")) closeMenus();
 
     if (e.target.closest("[data-close]")) { e.preventDefault(); closeOrder(); return; }
     if (e.target === document.getElementById("order-modal")) { closeOrder(); return; }
@@ -1135,7 +1171,8 @@
       e.preventDefault(); e.stopPropagation();
       var ap = byId(arch.dataset.archive);
       if (ap) { ap.status = "archived"; toast("Product archived"); }
-      renderProducts(); renderDetail();
+      renderProducts();
+      if (curPage === "detail") renderDetail();
       return;
     }
 
@@ -1167,7 +1204,9 @@
         p.status = p.status === "published" ? "unpublished" : "published";
         toast(p.status === "published" ? "Published" : "Unpublished");
       }
-      go(tog.dataset.then || "detail");
+      // stay where you are: toggling from a row is a list action, and
+      // navigating to the product page is not what you asked for
+      go(tog.dataset.then || curPage);
       return;
     }
     if (e.target.closest("[data-stop]")) { e.preventDefault(); e.stopPropagation(); return; }
