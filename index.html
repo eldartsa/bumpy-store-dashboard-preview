@@ -68,6 +68,8 @@
   .btn.primary{background:var(--button-inverted);color:var(--fg-on-color);border-color:transparent}
   .btn.primary:hover{background:#3f3f46}
   .btn.danger{color:var(--fg-error)}
+  .btn.solid-danger{background:var(--fg-error);color:#fff;border-color:transparent}
+  .btn.solid-danger:hover{background:#be123c}
   .btn.sm{height:28px;padding:0 9px;font-size:12px}
   .btn:disabled{opacity:.5;cursor:not-allowed}
 
@@ -201,6 +203,43 @@
   .detail-field strong{color:var(--fg-base);font-size:13px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
   .detail-line{display:flex;align-items:center;gap:12px;justify-content:space-between}
   .detail-note{color:var(--fg-muted);font-size:12px}
+
+  /* ---- product hero: everything about the product, above the numbers ---- */
+  .hero{display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;padding:18px}
+  @media (max-width:760px){.hero{grid-template-columns:1fr}}
+  .hero-img{border-radius:var(--r);overflow:hidden;border:1px solid var(--border-base);
+    aspect-ratio:1;background:var(--bg-subtle)}
+  .hero-img svg{display:block;width:100%;height:100%}
+  .hero-main{min-width:0;display:grid;gap:14px;align-content:start}
+  .hero-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .hero h2{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em}
+  .hero-desc{margin:0;color:var(--fg-subtle);font-size:13px;line-height:1.5;max-width:62ch}
+
+  /* ---- Cancel & refund dialog: the events prototype's, adapted ---- */
+  .refund-dialog{width:min(560px,100%)}
+  .refund-icon{width:40px;height:40px;flex:0 0 auto;display:grid;place-items:center;
+    border-radius:8px;background:var(--tag-red-bg);color:var(--tag-red-text)}
+  .refund-policy-list{display:grid;gap:10px}
+  .refund-policy{display:grid;grid-template-columns:18px minmax(0,1fr);gap:10px;
+    border:1px solid var(--border-base);border-radius:6px;background:var(--bg-base);
+    padding:12px;text-align:left;cursor:pointer;font:inherit;width:100%}
+  .refund-policy.active{border-color:var(--fg-interactive);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+  .radio-dot{width:14px;height:14px;margin-top:2px;border:1px solid var(--border-strong);
+    border-radius:999px;background:var(--bg-base)}
+  .refund-policy.active .radio-dot{border:4px solid var(--fg-interactive)}
+  .refund-policy-copy{display:grid;gap:4px}
+  .refund-policy-copy strong{color:var(--fg-base);font-size:13px;line-height:1.35}
+  .refund-policy-copy span{color:var(--fg-muted);font-size:12px;line-height:1.4}
+  .refund-money-line{color:var(--fg-subtle);font-size:12px;line-height:1.4;font-variant-numeric:tabular-nums}
+  .refund-form{display:grid;gap:8px}
+  .refund-form label{color:var(--fg-base);font-size:13px;font-weight:600}
+  .refund-form textarea{min-height:82px;resize:vertical;border:1px solid var(--border-strong);
+    border-radius:6px;background:var(--bg-base);padding:8px 10px;font:inherit;font-size:13px;
+    color:var(--fg-base);outline:none}
+  .detail-footer{display:flex;justify-content:flex-end;gap:8px;
+    border-top:1px solid var(--border-base);padding:16px;flex:0 0 auto}
+  .detail-header .detail-title span{display:block;color:var(--fg-muted);font-size:13px;
+    line-height:1.4;font-weight:400;margin-top:4px}
 
   /* ---- empty state ---- */
   .empty{padding:52px 20px;text-align:center}
@@ -390,6 +429,7 @@
 </aside>
 <div class="main"><div class="content" id="c-settings"></div></div></section>
 <div class="detail-backdrop" id="order-modal"></div>
+<div class="detail-backdrop refund-backdrop" id="refund-modal" style="z-index:1100"></div>
 <div id="toast" role="status" aria-live="polite"></div>
 <script>
   window.__ICONS = {
@@ -515,7 +555,10 @@
         '<td><span class="t-name">'+esc(o.buyer)+'</span><div class="t-sub">'+esc(o.email)+'</div></td>'+
         '<td class="num">'+thb(o.amount)+'</td>'+
         '<td>'+badge(PAY,o.pay)+'</td>'+
-        '<td class="num muted">'+o.when+'</td></tr>';
+        '<td>'+badge(VCH,o.vch)+'</td>'+
+        '<td class="num muted">'+o.when+'</td>'+
+        '<td class="num"><span class="row-actions" style="justify-content:flex-end">'+
+          orderActions(o, "row")+'</span></td></tr>';
     }
     return '<tr data-order="'+o.no+'">'+
       '<td><span class="t-name">#'+o.no+'</span></td>'+
@@ -530,47 +573,75 @@
         orderActions(o, "row")+'</span></td></tr>';
   }
 
+  // Everything about the product sits above the numbers: the seller opening
+  // this page is checking what they published, not reading a report.
+  function productActions(p){
+    var live = p.status === "published";
+    return '<span class="kebab" data-kebab><button type="button" aria-label="Product actions" data-stop>'+
+      I_KEBAB+'</button><div class="menu">'+
+        '<button class="menu-item" data-go="edit" data-id="'+p.id+'">Edit</button>'+
+        '<button class="menu-item" data-toggle="'+p.id+'">'+(live ? "Unpublish" : "Publish")+'</button>'+
+        '<button class="menu-item" data-copy="'+esc(p.slug)+'">Copy link</button>'+
+        // Dates live in the title, so a seller running the same trip weekly
+        // creates a near-identical product every time. Duplicate is the direct
+        // consequence of that decision, not a nice-to-have.
+        '<button class="menu-item" data-duplicate="'+p.id+'">Duplicate</button>'+
+        '<button class="menu-item" data-go="orders">View orders</button>'+
+        '<div class="menu-sep"></div>'+
+        '<button class="menu-item danger" data-archive="'+p.id+'">Archive</button>'+
+      '</div></span>';
+  }
+
   function renderDetail(){
     var p = byId(sel.product) || PRODUCTS[0];
     if (!p) { go("products"); return; }
     var mine = ORDERS.filter(function(o){ return o.pid === p.id; });
     var revenue = mine.reduce(function(s,o){ return s + (o.pay==="paid" ? o.amount : 0); }, 0);
+    var st = STATUS[p.status] || ["neutral", p.status];
+
     document.getElementById("c-detail").innerHTML =
       '<div class="crumb"><a data-go="products">Products</a>'+ICONS.chev+'<span>'+esc(p.t)+'</span></div>'+
-      '<div class="ph"><div><h1>'+esc(p.t)+'</h1><p>'+badge(STATUS,p.status)+'</p></div>'+
-        '<div style="display:flex;gap:8px">'+
-          '<button class="btn" data-go="edit" data-id="'+p.id+'">Edit</button>'+
-          '<button class="btn" data-toggle="'+p.id+'">'+(p.status==="published"?"Unpublish":"Publish")+'</button>'+
-        '</div></div>'+
+      '<div class="ph"><div><h1>'+esc(p.t)+'</h1></div>'+
+        '<div class="row-actions">'+ productActions(p) +'</div></div>'+
+
+      '<div class="card"><div class="hero">'+
+        '<div class="hero-img">'+(p.art
+          ? '<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><use href="#'+p.art+'"/></svg>'
+          : '<div class="empty" style="padding:0;height:100%;display:grid;place-items:center">'+
+            '<p style="margin:0">No image</p></div>')+'</div>'+
+        '<div class="hero-main">'+
+          '<div class="hero-top">'+badge(STATUS,p.status)+'</div>'+
+          '<p class="hero-desc">'+esc(p.desc)+'</p>'+
+          // What the product IS. Sold and remaining are performance, and the
+          // stats row below owns those — repeating them here just made the
+          // same two numbers appear twice on one screen.
+          '<div class="detail-grid">'+
+            field("Price", thb(p.price))+
+            field("Quantity", p.qty)+
+            field("Category", catLabel(p.cat))+
+            field("Added", esc(p.added || "—"))+
+            field("Status", badge(STATUS,p.status))+
+            field("Product ID", p.id)+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      shareBlock(p)+
+      '</div>'+
+
       '<div class="card"><div class="stats">'+
         '<div class="stat"><div class="k">Sold</div><div class="v">'+p.sold+'</div></div>'+
         '<div class="stat"><div class="k">Revenue</div><div class="v">'+thb(revenue)+'</div></div>'+
         '<div class="stat"><div class="k">Remaining</div><div class="v">'+(p.qty-p.sold)+'</div></div>'+
       '</div></div>'+
-      '<div class="two" style="margin-top:16px">'+
-        '<div class="card"><div class="card-h"><h2>Orders for this product</h2>'+
-          '<button class="btn sm" data-go="orders">View all</button></div>'+
-          (mine.length
-            ? '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Order</th><th>Buyer</th>'+
-              '<th class="num">Amount</th><th>Payment</th><th class="num">Date</th></tr></thead><tbody>'+
-              mine.map(function(o){ return orderRow(o,true); }).join("")+'</tbody></table></div>'
-            : '<div class="empty"><h3>No orders yet</h3><p>Share the link below to start selling.</p></div>')+
-        '</div>'+
-        '<div><div class="card">'+
-          '<div class="card-h"><h2>Details</h2></div>'+
-          (p.art ? '<div style="border-bottom:1px solid var(--border-base);height:150px;overflow:hidden">'+
-            '<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" style="display:block;width:100%;height:100%">'+
-            '<use href="#'+p.art+'"/></svg></div>' : '')+
-          '<div class="card-b">'+
-            '<p style="margin:0 0 12px;color:var(--fg-subtle);font-size:13px">'+esc(p.desc)+'</p>'+
-            '<div class="kv"><span class="k">Category</span><span class="v">'+catLabel(p.cat)+'</span></div>'+
-            '<div class="kv"><span class="k">Price</span><span class="v">'+thb(p.price)+'</span></div>'+
-            '<div class="kv"><span class="k">Quantity</span><span class="v">'+p.qty+'</span></div>'+
-            '<div class="kv"><span class="k">Status</span><span class="v">'+badge(STATUS,p.status)+'</span></div>'+
-            '<div class="kv"><span class="k">Added</span><span class="v">'+esc(p.added || "—")+'</span></div>'+
-          '</div>'+
-          shareBlock(p)+
-        '</div></div>'+
+
+      '<div class="card"><div class="card-h"><h2>Orders for this product</h2>'+
+        '<button class="btn sm" data-go="orders">View all</button></div>'+
+        (mine.length
+          ? '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Order</th><th>Buyer</th>'+
+            '<th class="num">Amount</th><th>Payment</th><th>Redemption</th><th class="num">Date</th>'+
+            '<th></th></tr></thead><tbody>'+
+            mine.map(function(o){ return orderRow(o,true); }).join("")+'</tbody></table></div>'
+          : '<div class="empty"><h3>No orders yet</h3><p>Share the link above to start selling.</p></div>')+
       '</div>';
   }
 
@@ -618,7 +689,7 @@
     items.push('<button class="menu-item" data-copyref="'+o.no+'">Copy voucher reference</button>');
     if (o.pay === "paid") {
       items.push('<div class="menu-sep"></div>');
-      items.push('<button class="menu-item danger" data-refund="'+o.no+'">Refund</button>');
+      items.push('<button class="menu-item danger" data-refund="'+o.no+'">Cancel &amp; refund</button>');
     }
     return inline +
       '<span class="kebab" data-kebab><button type="button" aria-label="Order actions" data-stop>'+
@@ -851,6 +922,98 @@
       '</div>';
   }
 
+  // ------------------------------------------------------- cancel & refund
+  // The events prototype's refund dialog, adapted. The point of it is that a
+  // refund is not one number: who eats the commission is a separate decision
+  // from how much the buyer gets back, and the seller has to see both.
+  var refundFor = null, refundPolicy = "standard", refundAbsorb = "vendor";
+
+  function refundOptions(o){
+    var p = byId(o.pid) || {price:0};
+    var sub = p.price * o.qty, fee = o.amount - sub;
+    var stripeFee = Math.round(o.amount * 0.029) + 10;
+    return [
+      {k:"standard", t:"Standard refund",
+       d:"Refund the total minus the Bumpy service fee.",
+       refund:o.amount - fee, vendor:sub, bumpy:fee},
+      {k:"minfee", t:"Minimum fee",
+       d:"Refund the total minus the card processing fee only.",
+       refund:o.amount - stripeFee, vendor:sub, bumpy:fee - stripeFee},
+      {k:"full", t:"Full refund",
+       d:"Refund everything the buyer paid, service fee included.",
+       refund:o.amount, vendor:sub, bumpy:0}
+    ];
+  }
+
+  var ABSORB = [
+    {k:"vendor", t:"You absorb the fee", d:"The service fee comes out of your payout."},
+    {k:"bumpy",  t:"Bumpy absorbs the fee", d:"Use when a support or policy exception covers it."},
+    {k:"split",  t:"Split the fee", d:"Bumpy 50% · you 50%."}
+  ];
+
+  function renderRefund(){
+    var host = document.getElementById("refund-modal");
+    if (!refundFor) { host.className = "detail-backdrop"; host.innerHTML = ""; return; }
+    var o = refundFor, opts = refundOptions(o), pick = opts.filter(function(x){ return x.k === refundPolicy; })[0];
+
+    host.innerHTML =
+      '<section class="detail-dialog refund-dialog" role="dialog" aria-modal="true" aria-labelledby="rf-title">'+
+        '<header class="detail-header">'+
+          '<div class="row-actions" style="align-items:flex-start">'+
+            '<span class="refund-icon" aria-hidden="true">'+
+              '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'+
+            '</span>'+
+            '<div class="detail-title"><h2 id="rf-title">Cancel &amp; refund order #'+o.no+'</h2>'+
+              '<span>This cancels the order, voids the voucher and refunds against '+thb(o.amount)+'.</span></div>'+
+          '</div>'+
+          '<button class="icon-close" type="button" data-refund-close aria-label="Close">'+
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'+
+          '</button>'+
+        '</header>'+
+        '<div class="detail-body">'+
+          '<div class="detail-section"><h3>Refund policy</h3><div class="refund-policy-list">'+
+            opts.map(function(x){
+              return '<button class="refund-policy'+(x.k===refundPolicy?" active":"")+'" type="button" data-policy="'+x.k+'">'+
+                '<span class="radio-dot"></span><span class="refund-policy-copy">'+
+                '<strong>'+x.t+'</strong><span>'+x.d+'</span>'+
+                '<span class="refund-money-line">Buyer '+thb(x.refund)+' &nbsp;|&nbsp; You '+thb(x.vendor)+' &nbsp;|&nbsp; Bumpy '+thb(x.bumpy)+'</span>'+
+                '</span></button>';
+            }).join("")+
+          '</div></div>'+
+          (refundPolicy === "full"
+            ? '<div class="detail-section"><h3>Who absorbs the fee</h3><div class="refund-policy-list">'+
+              ABSORB.map(function(x){
+                return '<button class="refund-policy'+(x.k===refundAbsorb?" active":"")+'" type="button" data-absorb="'+x.k+'">'+
+                  '<span class="radio-dot"></span><span class="refund-policy-copy">'+
+                  '<strong>'+x.t+'</strong><span>'+x.d+'</span></span></button>';
+              }).join("")+
+              '</div></div>'
+            : '')+
+          '<div class="detail-section"><div class="refund-form">'+
+            '<label for="rf-reason">Reason (optional)</label>'+
+            '<textarea id="rf-reason" placeholder="Add a note about why this order is being canceled..."></textarea>'+
+          '</div></div>'+
+        '</div>'+
+        '<footer class="detail-footer">'+
+          '<button class="btn" type="button" data-refund-close>Keep order</button>'+
+          '<button class="btn solid-danger" type="button" data-refund-confirm>Cancel &amp; refund '+thb(pick.refund)+'</button>'+
+        '</footer>'+
+      '</section>';
+    host.className = "detail-backdrop open";
+  }
+
+  function openRefund(no){
+    closeMenus();
+    refundFor = ORDERS.filter(function(x){ return x.no === no; })[0] || null;
+    refundPolicy = "standard"; refundAbsorb = "vendor";
+    renderRefund();
+    document.body.style.overflow = "hidden";
+  }
+  function closeRefund(){
+    refundFor = null; renderRefund();
+    if (!modalOpen) document.body.style.overflow = "";
+  }
+
   // ---------------------------------------------------------------- router
   var RENDER = {
     products: renderProducts, orders: renderOrders, detail: renderDetail,
@@ -864,6 +1027,7 @@
   // the list, so the dialog can deep-link for support without becoming a route
   // of its own.
   function openOrder(no){
+    closeMenus();
     sel.order = no; modalOpen = true;
     renderOrderModal();
     history.pushState({k:"orders", o:no}, "", "#orders/" + no);
@@ -898,7 +1062,11 @@
     if (st.o) { sel.order = st.o; modalOpen = true; renderOrderModal(); document.body.style.overflow = "hidden"; }
   });
   document.addEventListener("keydown", function(e){
-    if (e.key === "Escape") { if (modalOpen) closeOrder(); else closeMenus(); }
+    if (e.key === "Escape") {
+      if (refundFor) closeRefund();
+      else if (modalOpen) closeOrder();
+      else closeMenus();
+    }
   });
 
   function closeMenus(){
@@ -929,11 +1097,45 @@
       return;
     }
     var ref = e.target.closest("[data-refund]");
-    if (ref) {
+    if (ref) { e.preventDefault(); e.stopPropagation(); openRefund(ref.dataset.refund); return; }
+    if (e.target.closest("[data-refund-close]") || e.target === document.getElementById("refund-modal")) {
+      e.preventDefault(); closeRefund(); return;
+    }
+    var pol = e.target.closest("[data-policy]");
+    if (pol) { e.preventDefault(); refundPolicy = pol.dataset.policy; renderRefund(); return; }
+    var abs = e.target.closest("[data-absorb]");
+    if (abs) { e.preventDefault(); refundAbsorb = abs.dataset.absorb; renderRefund(); return; }
+    if (e.target.closest("[data-refund-confirm]")) {
+      e.preventDefault();
+      var ro = refundFor;
+      if (ro) { ro.pay = "refunded"; ro.vch = "void"; ro.rat = null;
+        toast("Order #"+ro.no+" cancelled and refunded"); }
+      closeRefund(); renderOrders(); renderOrderModal(); renderDetail();
+      return;
+    }
+
+    var dup = e.target.closest("[data-duplicate]");
+    if (dup) {
       e.preventDefault(); e.stopPropagation();
-      var ro = ORDERS.filter(function(x){ return x.no === ref.dataset.refund; })[0];
-      if (ro) { ro.pay = "refunded"; ro.vch = "void"; ro.rat = null; toast("Order #"+ro.no+" refunded"); }
-      renderOrders(); renderOrderModal();
+      var src = byId(dup.dataset.duplicate);
+      if (src) {
+        var copy = Object.assign({}, src, {
+          id: "sti_" + String(PRODUCTS.length + 1).padStart(2, "0"),
+          t: src.t + " (copy)", slug: slugify(src.t + "-copy"),
+          sold: 0, status: "draft", added: "Today"
+        });
+        PRODUCTS.push(copy); sel.product = copy.id;
+        toast("Duplicated as a draft");
+        renderProducts(); go("edit");
+      }
+      return;
+    }
+    var arch = e.target.closest("[data-archive]");
+    if (arch) {
+      e.preventDefault(); e.stopPropagation();
+      var ap = byId(arch.dataset.archive);
+      if (ap) { ap.status = "archived"; toast("Product archived"); }
+      renderProducts(); renderDetail();
       return;
     }
 
